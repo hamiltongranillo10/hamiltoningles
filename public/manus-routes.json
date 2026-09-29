@@ -1,0 +1,12 @@
+{
+  "routes": [
+    { "path": "/", "title": "Inicio" },
+    { "path": "/#inicio", "title": "Inicio" },
+    { "path": "/#lecciones", "title": "Lecciones" },
+    { "path": "/#hoja", "title": "Hoja de trabajo" },
+    { "path": "/#practica", "title": "Práctica escrita" },
+    { "path": "/#fragmento-autorizado", "title": "Mi voz" },
+    { "path": "/#mi-voz", "title": "Mi voz" },
+    { "path": "/#tu-audio", "title": "Tu audio de Drive" }
+  ]
+}
