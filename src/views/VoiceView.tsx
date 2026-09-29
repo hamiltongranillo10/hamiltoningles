@@ -2,26 +2,32 @@ import { useEffect, useRef, useState } from 'react';
 import { AudioButton } from '../components/AudioButton';
 import { Icon } from '../components/Icons';
 import { createAudioModelClient, type AudioModelProgress } from '../audio-model-client';
+import { createBrowserTranslator } from '../browser-translator';
 import { decodeAudioForWhisper } from '../audio-input';
 
 const MAX_RECORDING_SECONDS = 20;
 const MAX_MIC_AUDIO_BYTES = 10 * 1024 * 1024;
+type TranslationEngine = 'browser' | 'local';
 
 function progressLabel(progress: AudioModelProgress | null) {
-  if (!progress) return 'El modelo se prepara al usarlo por primera vez.';
-  return progress.message;
+  return progress?.message ?? 'El traductor se prepara al usarlo por primera vez.';
+}
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'No se pudo traducir en este dispositivo.';
 }
 
 export function VoiceView() {
   const clientRef = useRef<ReturnType<typeof createAudioModelClient> | null>(null);
+  const browserTranslatorRef = useRef<ReturnType<typeof createBrowserTranslator> | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<number | null>(null);
   const mountedRef = useRef(false);
   const translationJobRef = useRef(0);
-  const skipNextTranslationRef = useRef('');
   const [phrase, setPhrase] = useState('');
   const [translation, setTranslation] = useState('');
+  const [translationEngine, setTranslationEngine] = useState<TranslationEngine | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isRequestingMic, setIsRequestingMic] = useState(false);
@@ -32,7 +38,9 @@ export function VoiceView() {
   useEffect(() => {
     mountedRef.current = true;
     const client = createAudioModelClient(setProgress);
+    const browserTranslator = createBrowserTranslator(setProgress);
     clientRef.current = client;
+    browserTranslatorRef.current = browserTranslator;
     return () => {
       mountedRef.current = false;
       translationJobRef.current += 1;
@@ -40,44 +48,108 @@ export function VoiceView() {
       if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
       streamRef.current?.getTracks().forEach((track) => track.stop());
       client.dispose();
+      browserTranslator.dispose();
       clientRef.current = null;
+      browserTranslatorRef.current = null;
     };
   }, []);
+
+  async function translateWithFallback(text: string): Promise<{ translation: string; engine: TranslationEngine }> {
+    const browserTranslator = browserTranslatorRef.current;
+    let browserError: Error | null = null;
+    if (browserTranslator?.isSupported()) {
+      try {
+        browserTranslator.prepare();
+        const result = await browserTranslator.translate(text);
+        return { translation: result, engine: 'browser' };
+      } catch (cause) {
+        browserError = cause instanceof Error ? cause : new Error('El traductor del navegador no pudo responder.');
+      }
+    }
+
+    const localClient = clientRef.current;
+    if (!localClient) throw new Error('La sección de voz se está cerrando. Vuelve a abrirla e intenta de nuevo.');
+    try {
+      const result = await localClient.translate(text);
+      if (!result.trim()) throw new Error('El modelo local no devolvió texto.');
+      return { translation: result.trim(), engine: 'local' };
+    } catch (localCause) {
+      const localError = errorMessage(localCause);
+      if (browserError) {
+        throw new Error(`No funcionó la traducción integrada del navegador ni el respaldo local. Navegador: ${browserError.message} Respaldo: ${localError}`);
+      }
+      throw new Error(`No funcionó el modelo local de traducción. ${localError}`);
+    }
+  }
+
+  async function runTranslation(text: string, job: number) {
+    if (!text || job !== translationJobRef.current) return;
+    setError('');
+    setIsTranslating(true);
+    try {
+      const result = await translateWithFallback(text);
+      if (mountedRef.current && job === translationJobRef.current) {
+        setTranslation(result.translation);
+        setTranslationEngine(result.engine);
+        setProgress({
+          stage: 'ready',
+          message: result.engine === 'browser'
+            ? 'Traducción con la IA integrada del navegador; procesada en este dispositivo.'
+            : 'Traducción completada con el modelo local de respaldo.',
+        });
+      }
+    } catch (cause) {
+      if (mountedRef.current && job === translationJobRef.current) {
+        setProgress(null);
+        setTranslation('');
+        setTranslationEngine(null);
+        setError(errorMessage(cause));
+      }
+    } finally {
+      if (mountedRef.current && job === translationJobRef.current) setIsTranslating(false);
+    }
+  }
 
   useEffect(() => {
     const text = phrase.trim();
     const job = ++translationJobRef.current;
     if (!text) {
       setTranslation('');
+      setTranslationEngine(null);
       setIsTranslating(false);
       return;
     }
-    setProgress(null);
-    if (skipNextTranslationRef.current === text) {
-      skipNextTranslationRef.current = '';
-      return;
-    }
 
-    const timer = window.setTimeout(async () => {
-      const client = clientRef.current;
-      if (!client) return;
-      setError('');
-      setIsTranslating(true);
-      try {
-        const result = await client.translate(text);
-        if (mountedRef.current && job === translationJobRef.current) setTranslation(result);
-      } catch (cause) {
-        if (mountedRef.current && job === translationJobRef.current) {
-          setError(cause instanceof Error ? cause.message : 'No se pudo traducir en este dispositivo.');
-        }
-      } finally {
-        if (mountedRef.current && job === translationJobRef.current) setIsTranslating(false);
-      }
-    }, 650);
+    setTranslation('');
+    setTranslationEngine(null);
+    const timer = window.setTimeout(() => { void runTranslation(text, job); }, 650);
     return () => window.clearTimeout(timer);
   }, [phrase]);
 
+  function handlePhraseChange(value: string) {
+    setPhrase(value);
+    setTranslation('');
+    setTranslationEngine(null);
+    setError('');
+    setRecordMessage('');
+    setProgress(null);
+    if (value.trim()) browserTranslatorRef.current?.prepare();
+  }
+
+  function translateNow() {
+    const text = phrase.trim();
+    if (!text || isTranslating) return;
+    const job = ++translationJobRef.current;
+    setTranslation('');
+    setTranslationEngine(null);
+    setProgress(null);
+    browserTranslatorRef.current?.prepare();
+    void runTranslation(text, job);
+  }
+
   async function startRecording() {
+    // Start native translator creation synchronously from the user's click; some browsers require activation.
+    browserTranslatorRef.current?.prepare();
     setError('');
     setRecordMessage('');
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
@@ -122,19 +194,23 @@ export function VoiceView() {
         if (mountedRef.current) setRecordMessage('Preparando la grabación en este navegador…');
         try {
           const samples = await decodeAudioForWhisper(audio);
-          if (mountedRef.current) setRecordMessage('Reconociendo y traduciendo localmente…');
-          const segments = await client.transcribeAndTranslate(samples);
+          if (mountedRef.current) setRecordMessage('Reconociendo la voz localmente…');
+          const transcription = await client.transcribe(samples);
           if (!mountedRef.current) return;
-          const recognized = segments.map((segment) => segment.text).join(' ').trim().slice(0, 160);
-          const translated = segments.map((segment) => segment.translation).join(' ').trim();
-          skipNextTranslationRef.current = recognized;
+          const recognized = transcription.map((segment) => segment.text).join(' ').trim().slice(0, 160);
+          if (!recognized) throw new Error('No se reconocieron palabras. Prueba con una frase clara y breve.');
           setPhrase(recognized);
-          setTranslation(translated);
-          setRecordMessage('Listo. Revisa el texto: la transcripción automática puede equivocarse.');
+          setTranslation('');
+          setTranslationEngine(null);
+          setRecordMessage('Listo. Revisa el texto reconocido; se traducirá en esta misma página.');
+          if (recognized === phrase.trim()) {
+            const job = ++translationJobRef.current;
+            void runTranslation(recognized, job);
+          }
         } catch (cause) {
           if (mountedRef.current) {
             setRecordMessage('');
-            setError(cause instanceof Error ? cause.message : 'No se pudo reconocer la frase.');
+            setError(errorMessage(cause));
           }
         }
       }, { once: true });
@@ -167,7 +243,7 @@ export function VoiceView() {
         <div>
           <span className="eyebrow eyebrow-pill"><Icon name="mic" size={13} /> PRÁCTICA LIBRE · TU VOZ</span>
           <h1>Mi fragmento autorizado</h1>
-          <p className="lead">Escribe una frase breve en inglés. El modelo local prepara su significado en español; también puedes practicar con tu micrófono.</p>
+          <p className="lead">Escribe una frase breve en inglés. La IA integrada del navegador la traduce cuando está disponible; también puedes practicar con tu micrófono.</p>
         </div>
         <div className="voice-mark"><Icon name="music" size={22} /></div>
       </div>
@@ -181,20 +257,23 @@ export function VoiceView() {
             maxLength={160}
             rows={4}
             value={phrase}
-            onChange={(event) => { setPhrase(event.currentTarget.value); setRecordMessage(''); }}
+            onChange={(event) => handlePhraseChange(event.currentTarget.value)}
             placeholder="Escribe o pega aquí una frase corta en inglés…"
             aria-describedby="voice-count voice-helper"
           />
-          <div className="voice-counter-row"><span id="voice-helper">La traducción aparece al terminar de escribir.</span><span id="voice-count">{phrase.length}/160</span></div>
+          <div className="voice-counter-row"><span id="voice-helper">Se traduce al terminar de escribir; si no sucede, pulsa «Traducir ahora».</span><span id="voice-count">{phrase.length}/160</span></div>
           <div className="voice-actions">
             <AudioButton text={phrase} label="Escuchar mi fragmento" />
+            <button className="button button-primary" type="button" onClick={translateNow} disabled={!phrase.trim() || isTranslating}>
+              <Icon name="sparkle" size={15} /> {isTranslating ? 'Traduciendo…' : 'Traducir ahora'}
+            </button>
             <button className={`button ${isRecording ? 'button-danger' : 'button-outline'}`} type="button" onClick={isRecording ? stopRecording : startRecording} disabled={isRequestingMic}>
               <Icon name="mic" size={16} /> {isRequestingMic ? 'Esperando permiso…' : isRecording ? 'Detener y revisar' : 'Grabar mi voz'}
             </button>
           </div>
           {recordMessage && <p className="voice-record-status" role="status">{recordMessage}</p>}
           {error && <p className="error-notice" role="alert">{error}</p>}
-          <p className="voice-microphone-note"><Icon name="shield" size={14} /> El micrófono solo se activa al pulsar «Grabar mi voz». La grabación se reconoce en este dispositivo y no se sube.</p>
+          <p className="voice-microphone-note"><Icon name="shield" size={14} /> El micrófono solo se activa al pulsar «Grabar mi voz». Whisper reconoce la frase en este dispositivo; el audio no se sube.</p>
         </section>
 
         <section className="surface-card voice-result-panel" aria-labelledby="voice-result-title">
@@ -204,9 +283,12 @@ export function VoiceView() {
             <>
               <div className="voice-original"><span>INGLÉS</span><p>{phrase.trim()}</p></div>
               <div className="voice-translation"><span>ESPAÑOL</span>
-                {isTranslating && !translation ? <p className="muted">{progressLabel(progress)}</p> : <p>{translation || 'Preparando una traducción local…'}</p>}
+                {isTranslating && !translation ? <p className="muted">{progressLabel(progress)}</p> : <p>{translation || 'Pulsa «Traducir ahora» para volver a intentarlo.'}</p>}
               </div>
-              {translation && <AudioButton text={phrase.trim()} label="Escuchar pronunciación" />}
+              {translation && <>
+                <AudioButton text={phrase.trim()} label="Escuchar pronunciación" />
+                {translationEngine && <p className="translation-source" role="status">{translationEngine === 'browser' ? 'IA integrada del navegador · procesamiento local' : 'Modelo local de respaldo · sin API de pago'}</p>}
+              </>}
             </>
           ) : (
             <div className="voice-placeholder"><Icon name="sparkle" size={18} /><p>La traducción y la guía para escuchar aparecerán aquí.</p></div>
@@ -215,8 +297,8 @@ export function VoiceView() {
         </section>
       </div>
 
-      <div className="privacy-panel surface-card"><Icon name="shield" size={16} /><p><strong>Uso privado y responsable</strong><span>El clip y el texto se quedan temporalmente en esta página; nada se envía a un servicio de IA de pago. Los modelos públicos se descargan la primera vez y pueden guardarse en la caché del navegador. La rapidez depende de tu dispositivo y conexión.</span></p></div>
-      <p className="model-credit">Modelos gratuitos y locales: <a href="https://huggingface.co/onnx-community/whisper-base.en" target="_blank" rel="noreferrer">Whisper Base English, ONNX</a> · <a href="https://huggingface.co/onnx-community/opus-mt-en-es" target="_blank" rel="noreferrer">OPUS-MT English–Spanish, CC BY 4.0</a>. Se descargan la primera vez; la descarga puede ocupar bastante espacio y requiere conexión, pero no consume créditos de IA ni envía el audio.</p>
+      <div className="privacy-panel surface-card"><Icon name="shield" size={16} /><p><strong>Procesamiento en tu navegador</strong><span>En Chrome/Edge de escritorio, la IA integrada traduce en este dispositivo y prepara su modelo la primera vez. Si no está disponible, se usa el respaldo local. La voz no se sube y no se llama a una API de IA de pago; el navegador puede descargar modelos la primera vez.</span></p></div>
+      <p className="model-credit">Respaldo de voz y traducción local: <a href="https://huggingface.co/onnx-community/whisper-base.en" target="_blank" rel="noreferrer">Whisper Base English, ONNX</a> · <a href="https://huggingface.co/onnx-community/opus-mt-en-es" target="_blank" rel="noreferrer">OPUS-MT English–Spanish, CC BY 4.0</a>. Solo se descargan si el navegador necesita ese respaldo; no consumen créditos de IA.</p>
     </div>
   );
 }

@@ -508,6 +508,7 @@ p { color: var(--muted); }
 .voice-original, .voice-translation { width: 100%; margin-bottom: 10px; padding: 12px 13px; border: 1px solid var(--line-soft); border-radius: 12px; background: rgba(8,9,12,.2); }
 .voice-original > span, .voice-translation > span { color: var(--subtle); font-size: 8px; font-weight: 800; letter-spacing: .14em; }
 .voice-original p, .voice-translation p { margin: 7px 0 0; color: #e7e4ee; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.translation-source { margin: 7px 0 0; color: var(--subtle); font-size: 8px; line-height: 1.5; }
 .voice-placeholder { width: 100%; min-height: 130px; display: grid; place-content: center; justify-items: center; gap: 10px; padding: 16px; border: 1px dashed var(--line); border-radius: 12px; color: var(--lavender); text-align: center; }
 .voice-placeholder p { max-width: 250px; margin: 0; font-size: 10px; line-height: 1.6; }
 .local-progress { width: 100%; display: grid; gap: 8px; margin-top: 12px; padding: 10px 11px; border: 1px solid var(--line-soft); border-radius: 10px; background: rgba(255,255,255,.02); color: var(--muted); font-size: 9px; line-height: 1.5; }

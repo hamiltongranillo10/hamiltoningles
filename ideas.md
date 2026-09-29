@@ -16,7 +16,7 @@ Aula digital editorial con claridad de producto: una interfaz acogedora y progre
 4. Prioridad a legibilidad, contraste y espacios de respuesta; los puntos y adornos son secundarios.
 5. No hacer pasar IA externa por local ni simulaciones por una llamada real. La voz y Drive deben tener estados reales, mensajes de permiso y fallos comprensibles.
 6. Respetar privacidad: no guardar audio ni resultados; pedir micrófono o procesar un archivo de Drive solo tras una acción consciente y con aviso claro.
-7. Resolver ASR/traducción en el navegador mediante modelos públicos descargados a demanda. No llamar a proveedores de inferencia, no usar créditos de Manus y no pedir claves. La descarga inicial/cache de modelos se explica aparte de la privacidad del audio.
+7. Para Mi voz, usar primero la traducción integrada del navegador en escritorio cuando esté disponible; iniciar el modelo dentro de una acción del usuario, mostrar su preparación y describirla como procesamiento local del navegador. Si no está disponible, recurrir al modelo público local bajo demanda. No llamar a proveedores de inferencia pagados, no usar créditos de Manus y no pedir claves. La descarga inicial/caché se explica aparte de la privacidad del audio.
 
 ## Color y superficies
 
@@ -33,7 +33,7 @@ En escritorio: navegación lateral compacta con marca y destinos claros; conteni
 - Indicador de progreso breve, sin dominar la pantalla.
 - Hoja de trabajo con etiqueta de nivel, unidad, número de ejercicios y control separado de clave/impresión.
 - Estado de práctica escrita con ronda, puntos y tipo de ejercicio.
-- Mi voz: contador visible de 160 caracteres, controles discretos de grabar/detener/escuchar y nota local.
+- Mi voz: contador visible de 160 caracteres, controles discretos de grabar/detener/escuchar, acción para reintentar la traducción, etiqueta del motor activo y nota local.
 - Tu audio: URL de Drive, confirmación de permiso, reproductor, progreso de modelo y resultado por segmento (inglés, español, reproducción de pronunciación).
 
 ## Interacción y movimiento

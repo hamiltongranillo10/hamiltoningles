@@ -1,5 +1,5 @@
 import { pipeline, type ProgressInfo } from '@huggingface/transformers';
-import type { AudioModelProgress, AudioSegment, AudioWorkerRequest, AudioWorkerResponse, AudioWorkerResult } from '../audio-model-client';
+import type { AudioModelProgress, AudioSegment, AudioWorkerRequest, AudioWorkerResponse, AudioWorkerResult, TranscriptionSegment } from '../audio-model-client';
 
 const ASR_MODEL = 'onnx-community/whisper-base.en';
 const TRANSLATION_MODEL = 'onnx-community/opus-mt-en-es';
@@ -145,7 +145,9 @@ async function translateTexts(texts: string[], id: number) {
   const translations: string[] = [];
   for (let index = 0; index < texts.length; index += 1) {
     report(id, 'translating', `Traduciendo línea ${index + 1} de ${texts.length} en este dispositivo…`);
-    translations.push(await translateOne(texts[index], id));
+    const translation = await translateOne(texts[index], id);
+    if (!translation) throw new Error('El modelo local no devolvió una traducción. Vuelve a intentarlo o usa un navegador de escritorio compatible.');
+    translations.push(translation);
   }
   return translations;
 }
@@ -158,17 +160,9 @@ function userFacingError(error: unknown) {
   return message || 'El modelo local no pudo completar el procesamiento. Revisa la conexión y los recursos del dispositivo.';
 }
 
-async function processRequest(request: AudioWorkerRequest): Promise<AudioWorkerResult> {
-  if (request.action === 'translate') {
-    const text = request.text.trim();
-    if (!text) return { translation: '' };
-    const [translation] = await translateTexts([text], request.id);
-    report(request.id, 'ready', 'Traducción lista en este dispositivo.');
-    return { translation: translation ?? '' };
-  }
-
-  report(request.id, 'transcribing', 'Reconociendo la voz en este dispositivo…');
-  const output = await transcribeWithFallback(request.audio, request.id);
+async function recognizeAudio(audio: Float32Array, id: number): Promise<TranscriptionSegment[]> {
+  report(id, 'transcribing', 'Reconociendo la voz en este dispositivo…');
+  const output = await transcribeWithFallback(audio, id);
   const raw = output.chunks?.filter((chunk) => chunk.text.trim()) ?? [];
   const chunks = raw.length > 0
     ? raw.map((chunk) => ({ text: chunk.text.trim(), start: chunk.timestamp[0], end: chunk.timestamp[1] }))
@@ -176,14 +170,28 @@ async function processRequest(request: AudioWorkerRequest): Promise<AudioWorkerR
       ? [{ text: output.text.trim(), start: null, end: null }]
       : [];
   if (chunks.length === 0) throw new Error('No se reconocieron palabras. Prueba con una voz más clara o un fragmento corto.');
+  return chunks.map((chunk, index) => ({ id: index + 1, ...chunk }));
+}
 
-  const translations = await translateTexts(chunks.map((chunk) => chunk.text), request.id);
-  const segments: AudioSegment[] = chunks.map((chunk, index) => ({
-    id: index + 1,
-    text: chunk.text,
-    translation: translations[index] ?? '',
-    start: chunk.start,
-    end: chunk.end,
+async function processRequest(request: AudioWorkerRequest): Promise<AudioWorkerResult> {
+  if (request.action === 'translate') {
+    const text = request.text.trim();
+    if (!text) return { translation: '' };
+    const [translation] = await translateTexts([text], request.id);
+    report(request.id, 'ready', 'Traducción lista en este dispositivo.');
+    return { translation };
+  }
+
+  const transcription = await recognizeAudio(request.audio, request.id);
+  if (request.action === 'transcribe') {
+    report(request.id, 'ready', 'Voz reconocida en este dispositivo.');
+    return { transcription };
+  }
+
+  const translations = await translateTexts(transcription.map((segment) => segment.text), request.id);
+  const segments: AudioSegment[] = transcription.map((segment, index) => ({
+    ...segment,
+    translation: translations[index],
   }));
   report(request.id, 'ready', 'Borrador listo para revisar.');
   return { segments };

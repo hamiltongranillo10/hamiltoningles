@@ -6,6 +6,13 @@ export interface AudioSegment {
   end: number | null;
 }
 
+export interface TranscriptionSegment {
+  id: number;
+  text: string;
+  start: number | null;
+  end: number | null;
+}
+
 export interface AudioModelProgress {
   stage: 'loading-asr' | 'loading-translation' | 'transcribing' | 'translating' | 'ready';
   percent?: number;
@@ -15,13 +22,18 @@ export interface AudioModelProgress {
 
 export type AudioWorkerRequest =
   | { id: number; action: 'translate'; text: string }
+  | { id: number; action: 'transcribe'; audio: Float32Array }
   | { id: number; action: 'transcribe-and-translate'; audio: Float32Array };
 
 export type AudioWorkerCommand =
   | { action: 'translate'; text: string }
+  | { action: 'transcribe'; audio: Float32Array }
   | { action: 'transcribe-and-translate'; audio: Float32Array };
 
-export type AudioWorkerResult = { translation: string } | { segments: AudioSegment[] };
+export type AudioWorkerResult =
+  | { translation: string }
+  | { transcription: TranscriptionSegment[] }
+  | { segments: AudioSegment[] };
 
 export type AudioWorkerResponse =
   | { id: number; kind: 'progress'; progress: AudioModelProgress }
@@ -94,7 +106,7 @@ export function createAudioModelClient(onProgress: (progress: AudioModelProgress
     return new Promise((resolve, reject) => {
       pending.set(id, { resolve, reject });
       try {
-        if (message.action === 'transcribe-and-translate' && message.audio.buffer instanceof ArrayBuffer) {
+        if (message.action !== 'translate' && message.audio.buffer instanceof ArrayBuffer) {
           currentWorker.postMessage(message, [message.audio.buffer]);
         } else {
           currentWorker.postMessage(message);
@@ -112,6 +124,11 @@ export function createAudioModelClient(onProgress: (progress: AudioModelProgress
       const result = await send({ action: 'translate', text });
       if (!('translation' in result)) throw new Error('La traducción local no devolvió texto.');
       return result.translation;
+    },
+    async transcribe(audio: Float32Array): Promise<TranscriptionSegment[]> {
+      const result = await send({ action: 'transcribe', audio });
+      if (!('transcription' in result)) throw new Error('El reconocimiento local no devolvió texto.');
+      return result.transcription;
     },
     async transcribeAndTranslate(audio: Float32Array): Promise<AudioSegment[]> {
       const result = await send({ action: 'transcribe-and-translate', audio });
