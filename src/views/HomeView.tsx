@@ -21,7 +21,14 @@ export function HomeView({ level, selectedLevel, onSelectLevel, onNavigate, comp
           <h1>Aprende inglés <span className="heading-soft">sin saltarte pasos.</span></h1>
           <p className="lead">Primero aprende. Después resuelve tu hoja y practica con actividades aparte.</p>
         </div>
-        <div className="points-card"><span>PROGRESO DE LA DEMO</span><strong>{completedIds.length} <small>/ 5 niveles</small></strong><div className="points-line"><i style={{ width: `${Math.min(completedIds.length * 20, 100)}%` }} /></div><span>{points} puntos de práctica</span></div>
+        <div className="points-card">
+          <span>PROGRESO LOCAL</span>
+          <strong>{completedIds.length} <small>/ 5 niveles</small></strong>
+          <div className="points-line" role="progressbar" aria-label="Niveles revisados" aria-valuemin={0} aria-valuemax={5} aria-valuenow={completedIds.length} aria-valuetext={`${completedIds.length} de 5 niveles revisados`}>
+            <i style={{ width: `${Math.min(completedIds.length * 20, 100)}%` }} />
+          </div>
+          <span>{points} puntos de práctica</span>
+        </div>
       </div>
 
       <section className="home-hero surface-card">
@@ -84,7 +91,7 @@ export function HomeView({ level, selectedLevel, onSelectLevel, onNavigate, comp
           <button className="text-button" type="button" onClick={() => onNavigate('audio')}>Abrir tu audio <Icon name="arrow" size={15} /></button>
         </article>
       </section>
-      <p className="demo-disclaimer">Esta es una demo para revisar la estructura; el contenido es una unidad modelo por nivel.</p>
+      <p className="demo-disclaimer">Demo independiente: cada nivel contiene una unidad modelo. El progreso se guarda en este dispositivo; las prácticas de voz y audio son temporales.</p>
     </div>
   );
 }

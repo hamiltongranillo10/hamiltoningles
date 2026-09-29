@@ -65,7 +65,7 @@ export function AppShell({ view, onNavigate, children }: AppShellProps) {
         </header>
         <div className="topbar">
           <div className="breadcrumbs"><span>English, paso a paso</span><Icon name="chevron" size={14} /><strong>{view === 'worksheet' ? 'Hoja de trabajo' : sectionName}</strong></div>
-          <div className="topbar-chip"><span className="status-dot" /> Solo vista previa</div>
+          <div className="topbar-chip"><span className="status-dot" aria-hidden="true" /> Demo independiente</div>
         </div>
         <main className="main-content">{children}</main>
       </div>
