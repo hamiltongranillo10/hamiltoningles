@@ -46,6 +46,26 @@ export const unitWorkbooks: UnitWorkbook[] = [
     reading: { title: 'Lee y comprende', text: 'Hello! My name is Ana. I am from Mexico. I am fine today. Nice to meet you, Luis.', question: 'Where is Ana from?', answer: 'Mexico' },
     selfCheck: { items: ['Puedo saludar en inglés.', 'Puedo decir mi nombre.', 'Puedo preguntar How are you?', 'Puedo despedirme con See you later.'] },
   },
+  {
+    unitId: 'a1-unit-2',
+    level: 'a1',
+    title: 'Unidad 2 · Datos personales',
+    instructions: 'Practica cómo decir tu edad, país, ciudad, teléfono y correo electrónico. Completa la ficha y escribe una presentación personal breve.',
+    fill: [
+      { id: 'fill-1', prompt: 'How ____ are you?', answer: 'old' },
+      { id: 'fill-2', prompt: 'I am ____ years old.', answer: 'twenty' },
+      { id: 'fill-3', prompt: 'Where ____ you from?', answer: 'are' },
+      { id: 'fill-4', prompt: 'I am ____ Spain.', answer: 'from' },
+      { id: 'fill-5', prompt: 'What is your phone ____?', answer: 'number' },
+      { id: 'fill-6', prompt: 'What is your email ____?', answer: 'address' },
+    ],
+    translation: { prompt: 'Tengo veinte años y soy de Colombia.', answer: 'I am twenty years old and I am from Colombia.', hint: 'Para la edad usa I am … years old. Para el país, usa I am from…' },
+    order: { words: ['from', 'I', 'Colombia.', 'am'], answer: 'I am from Colombia.', prompt: 'Pon las palabras en orden para decir tu país.' },
+    dictation: { answer: 'What is your email address?', prompt: 'Escucha y escribe la pregunta.' },
+    writing: { prompt: 'Completa una ficha personal en 4–5 frases: nombre, edad, país o ciudad y correo de ejemplo.', sample: 'My name is Luis. I am twenty years old. I am from Colombia. I live in Bogotá. My email address is luis@example.com.', lines: 5 },
+    reading: { title: 'Lee y comprende', text: 'Hi! My name is Sofia. I am nineteen years old. I am from Peru, but I live in Lima. My phone number is 555-0182.', question: 'Where does Sofia live?', answer: 'Lima' },
+    selfCheck: { items: ['Puedo decir mi edad.', 'Puedo decir de dónde soy.', 'Puedo decir dónde vivo.', 'Puedo preguntar por un teléfono o correo.'] },
+  },
 ];
 
 export function getUnitWorkbook(level: LevelId, unitId?: string): UnitWorkbook | undefined {
