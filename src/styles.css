@@ -165,6 +165,16 @@ p { color: var(--muted); }
 .lesson-title-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 24px; padding-bottom: 22px; border-bottom: 1px solid var(--line-soft); }
 .lesson-title-row h2 { margin: 5px 0 8px; font-size: clamp(29px, 3vw, 38px); }
 .lesson-title-row p { max-width: 720px; margin: 0; font-size: 13px; line-height: 1.65; }
+.unit-roadmap { margin-bottom: 15px; padding: 15px; box-shadow: none; }
+.unit-roadmap-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.unit-roadmap-heading h3 { margin: 4px 0 0; font-size: 17px; }
+.unit-roadmap-heading > span { color: var(--subtle); font-size: 9px; }
+.unit-roadmap-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 7px; }
+.unit-roadmap-card { min-width: 0; display: grid; gap: 4px; padding: 10px; border: 1px solid var(--line-soft); border-radius: 10px; background: rgba(255,255,255,.018); color: var(--muted); text-align: left; cursor: pointer; }
+.unit-roadmap-card:hover, .unit-roadmap-card.is-active { border-color: rgba(183,161,255,.45); background: rgba(183,161,255,.1); }
+.unit-roadmap-card > span { color: var(--lavender); font-size: 8px; font-weight: 800; }
+.unit-roadmap-card strong { overflow: hidden; color: var(--text); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.unit-roadmap-card small { overflow: hidden; color: var(--subtle); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
 .lesson-layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(235px, .72fr); align-items: start; gap: 17px; }
 .lesson-main-column { display: grid; gap: 14px; }
 .lesson-section { padding: 20px 21px; box-shadow: none; }
@@ -393,6 +403,7 @@ p { color: var(--muted); }
   .info-card { min-height: 0; }
   .lesson-title-row { align-items: flex-start; flex-direction: column; }
   .lesson-title-row .button { width: 100%; }
+  .unit-roadmap-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .lesson-aside { grid-template-columns: 1fr; }
   .lesson-section { padding: 16px; }
   .phrase-row { grid-template-columns: 22px minmax(0,1fr) auto; gap: 7px; }

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { AppShell, type AppView } from './components/AppShell';
 import { getLevel, levels, type LevelId } from './data/course';
+import { unitsForLevel } from './data/curriculum';
 import { HomeView } from './views/HomeView';
 import { LessonView } from './views/LessonView';
 import { PracticeView } from './views/PracticeView';
@@ -16,6 +17,7 @@ const favoritesKey = 'ingles-demo.saved-phrases';
 const reviewedKey = 'ingles-demo.reviewed-levels';
 const completedKey = 'ingles-demo.completed-levels';
 const pointsKey = 'ingles-demo.practice-points';
+const unitsKey = 'ingles-demo.selected-units';
 
 function initialLevel(): LevelId {
   const stored = readStored<string>(levelKey, 'a1');
@@ -53,7 +55,9 @@ export default function App() {
   const [reviewedLevels, setReviewedLevels] = useState<LevelId[]>(() => readStored(reviewedKey, []));
   const [completedLevels, setCompletedLevels] = useState<LevelId[]>(() => readStored(completedKey, []));
   const [points, setPoints] = useState<number>(() => readStored(pointsKey, 0));
+  const [selectedUnits, setSelectedUnits] = useState<Partial<Record<LevelId, string>>>(() => readStored(unitsKey, {}));
   const level = getLevel(selectedLevel);
+  const selectedUnitId = selectedUnits[selectedLevel] ?? unitsForLevel(selectedLevel)[0].id;
 
   useEffect(() => { writeStored(levelKey, selectedLevel); }, [selectedLevel]);
   useEffect(() => { writeStored(answersKey, answers); }, [answers]);
@@ -61,6 +65,7 @@ export default function App() {
   useEffect(() => { writeStored(reviewedKey, reviewedLevels); }, [reviewedLevels]);
   useEffect(() => { writeStored(completedKey, completedLevels); }, [completedLevels]);
   useEffect(() => { writeStored(pointsKey, points); }, [points]);
+  useEffect(() => { writeStored(unitsKey, selectedUnits); }, [selectedUnits]);
 
   useEffect(() => {
     const syncRoute = () => setView(viewFromHash(window.location.hash));
@@ -77,6 +82,10 @@ export default function App() {
 
   function selectLevel(id: LevelId) {
     setSelectedLevel(id);
+  }
+
+  function selectUnit(id: string) {
+    setSelectedUnits((current) => ({ ...current, [selectedLevel]: id }));
   }
 
   function updateAnswer(key: string, value: string) {
@@ -106,7 +115,7 @@ export default function App() {
   return (
     <AppShell view={view} onNavigate={navigate}>
       {view === 'home' && <HomeView level={level} selectedLevel={selectedLevel} onSelectLevel={selectLevel} onNavigate={navigate} completedIds={completedLevels} points={points} />}
-      {view === 'lesson' && <LessonView level={level} selectedLevel={selectedLevel} onSelectLevel={selectLevel} onNavigate={navigate} completed={completedLevels.includes(level.id)} />}
+      {view === 'lesson' && <LessonView level={level} selectedLevel={selectedLevel} selectedUnitId={selectedUnitId} onSelectLevel={selectLevel} onSelectUnit={selectUnit} onNavigate={navigate} completed={completedLevels.includes(level.id)} />}
       {view === 'worksheet' && <WorksheetView level={level} answers={answers} reviewed={reviewedLevels.includes(level.id)} onAnswer={updateAnswer} onReview={reviewWorksheet} onNavigate={navigate} onSelectLevel={selectLevel} />}
       {view === 'practice' && <PracticeView level={level} selectedLevel={selectedLevel} onSelectLevel={selectLevel} points={points} favorites={favorites} onToggleFavorite={toggleFavorite} onAwardPoints={(earned) => setPoints((current) => current + earned)} />}
       {view === 'voice' && <Suspense fallback={<FeatureLoading />}><VoiceView /></Suspense>}

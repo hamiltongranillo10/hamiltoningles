@@ -45,22 +45,22 @@ export function HomeView({ level, selectedLevel, onSelectLevel, onNavigate, comp
         <div className="hero-visual" aria-hidden="true">
           <div className="orbit orbit-one" /><div className="orbit orbit-two" />
           <div className="hero-monogram">Aa</div>
-          <div className="hero-mini-card"><span>{level.cefr} · UNIDAD MODELO</span><strong>{level.name}</strong><small>{level.module}</small></div>
+          <div className="hero-mini-card"><span>{level.cefr} · RUTA DE 8 UNIDADES</span><strong>{level.name}</strong><small>{level.module}</small></div>
         </div>
       </section>
 
       <section className="course-section">
         <div className="section-heading">
-          <div><span className="eyebrow">TU RUTA</span><h2>Elige tu nivel</h2><p>Una unidad completa de muestra por nivel, con su propia hoja de trabajo.</p></div>
+          <div><span className="eyebrow">TU RUTA</span><h2>Elige tu nivel</h2><p>Cada nivel está organizado en 8 unidades con objetivos, gramática y vocabulario progresivos.</p></div>
           <LevelPicker value={selectedLevel} onChange={onSelectLevel} compact />
         </div>
         <div className="level-card-grid">
-          {levels.map((item, index) => {
+          {levels.map((item) => {
             const selected = item.id === selectedLevel;
             const complete = completedIds.includes(item.id);
             return (
               <button key={item.id} type="button" className={`level-card${selected ? ' selected' : ''}`} onClick={() => { onSelectLevel(item.id); onNavigate('lesson'); }} aria-pressed={selected}>
-                <span className="level-card-top"><span className={`level-badge level-${item.id}`}>{item.cefr}</span><span className="level-card-state">{complete ? 'Revisada' : `0${index + 1} · Unidad modelo`}</span></span>
+                <span className="level-card-top"><span className={`level-badge level-${item.id}`}>{item.cefr}</span><span className="level-card-state">{complete ? 'Revisada' : '8 unidades'}</span></span>
                 <strong>{item.name}</strong><span className="level-card-subtitle">{item.subtitle}</span>
                 <span className="level-card-foot"><span>{item.weeks}</span><Icon name="arrow" size={16} /></span>
               </button>
