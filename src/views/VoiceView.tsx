@@ -5,7 +5,7 @@ import { Icon } from '../components/Icons';
 import { createAudioModelClient, type AudioModelProgress } from '../audio-model-client';
 import { createBrowserTranslator } from '../browser-translator';
 import { decodeAudioForWhisper } from '../audio-input';
-import { getConversationTopic, topicsForLevel, type ConversationTopic } from '../data/conversations';
+import { conversationTopics, getConversationTopic, topicsForLevel, type ConversationTopic } from '../data/conversations';
 import type { LevelId } from '../data/course';
 import { readStored, writeStored } from '../utils';
 
@@ -19,6 +19,15 @@ type ConversationSession = { id: number; topicId: string; level: LevelId; title:
 const conversationHistoryKey = 'ingles-demo.conversation-history';
 const conversationLevelKey = 'ingles-demo.conversation-level';
 const conversationTopicKey = 'ingles-demo.conversation-topic';
+const validLevels: LevelId[] = ['a1', 'a2', 'b1', 'b2', 'c1'];
+
+function initialConversationPreferences() {
+  const storedLevel = readStored<string>(conversationLevelKey, 'a1');
+  const level = validLevels.includes(storedLevel as LevelId) ? storedLevel as LevelId : 'a1';
+  const storedTopic = readStored<string>(conversationTopicKey, 'a1-introductions');
+  const topic = conversationTopics.find((item) => item.id === storedTopic && item.level === level) ?? topicsForLevel(level)[0];
+  return { level, topicId: topic.id };
+}
 
 function correctionFor(text: string): string | undefined {
   const clean = text.trim();
@@ -50,6 +59,7 @@ function errorMessage(error: unknown) {
 }
 
 export function VoiceView() {
+  const initialPreferences = initialConversationPreferences();
   const clientRef = useRef<ReturnType<typeof createAudioModelClient> | null>(null);
   const browserTranslatorRef = useRef<ReturnType<typeof createBrowserTranslator> | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -66,13 +76,16 @@ export function VoiceView() {
   const [recordMessage, setRecordMessage] = useState('');
   const [error, setError] = useState('');
   const [progress, setProgress] = useState<AudioModelProgress | null>(null);
-  const [conversationMessages, setConversationMessages] = useState<ConversationMessage[]>(() => starterForTopic(getConversationTopic(readStored(conversationTopicKey, 'a1-introductions'))));
+  const [conversationMessages, setConversationMessages] = useState<ConversationMessage[]>(() => starterForTopic(getConversationTopic(initialPreferences.topicId)));
   const [conversationInput, setConversationInput] = useState('');
   const [conversationStatus, setConversationStatus] = useState('');
   const [isConversationRecording, setIsConversationRecording] = useState(false);
-  const [conversationLevel, setConversationLevel] = useState<LevelId>(() => readStored<LevelId>(conversationLevelKey, 'a1'));
-  const [conversationTopicId, setConversationTopicId] = useState(() => readStored(conversationTopicKey, 'a1-introductions'));
-  const [conversationHistory, setConversationHistory] = useState<ConversationSession[]>(() => readStored(conversationHistoryKey, []));
+  const [conversationLevel, setConversationLevel] = useState<LevelId>(initialPreferences.level);
+  const [conversationTopicId, setConversationTopicId] = useState(initialPreferences.topicId);
+  const [conversationHistory, setConversationHistory] = useState<ConversationSession[]>(() => {
+    const stored = readStored<unknown>(conversationHistoryKey, []);
+    return Array.isArray(stored) ? stored.filter((item): item is ConversationSession => Boolean(item && typeof item === 'object' && 'id' in item && 'title' in item && 'level' in item)) : [];
+  });
   const [conversationTurns, setConversationTurns] = useState(0);
   const [conversationCorrections, setConversationCorrections] = useState(0);
   const [pronunciationFeedback, setPronunciationFeedback] = useState('');
