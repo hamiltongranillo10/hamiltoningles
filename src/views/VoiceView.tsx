@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { FormEvent } from 'react';
 import { AudioButton } from '../components/AudioButton';
 import { Icon } from '../components/Icons';
 import { createAudioModelClient, type AudioModelProgress } from '../audio-model-client';
@@ -8,6 +9,16 @@ import { decodeAudioForWhisper } from '../audio-input';
 const MAX_RECORDING_SECONDS = 20;
 const MAX_MIC_AUDIO_BYTES = 10 * 1024 * 1024;
 type TranslationEngine = 'browser' | 'local';
+
+type ConversationMessage = { id: number; speaker: 'companion' | 'you'; english: string; translation: string; tip?: string };
+
+const starterConversation: ConversationMessage[] = [
+  { id: 1, speaker: 'companion', english: 'Great—you’re an English student, Hamilton. What would you like to practice today?', translation: 'Genial, eres estudiante de inglés, Hamilton. ¿Qué te gustaría practicar hoy?', tip: 'Say “I’m an English student.”' },
+  { id: 2, speaker: 'you', english: 'See you later, Alex.', translation: 'Nos vemos luego, Alex.' },
+  { id: 3, speaker: 'companion', english: 'See you later, Hamilton — take care!', translation: 'Nos vemos luego, Hamilton. ¡Cuídate!', tip: '“Take care” es una despedida amable.' },
+  { id: 4, speaker: 'you', english: 'Take care too.', translation: 'Cuídate tú también.' },
+  { id: 5, speaker: 'companion', english: 'Thanks, Hamilton — you too. Talk to you later!', translation: 'Gracias, Hamilton. Tú también. ¡Hablamos luego!', tip: '“Talk to you later” también puede decirse “Talk to ya later”.' },
+];
 
 function progressLabel(progress: AudioModelProgress | null) {
   return progress?.message ?? 'El traductor se prepara al usarlo por primera vez.';
@@ -34,6 +45,10 @@ export function VoiceView() {
   const [recordMessage, setRecordMessage] = useState('');
   const [error, setError] = useState('');
   const [progress, setProgress] = useState<AudioModelProgress | null>(null);
+  const [conversationMessages, setConversationMessages] = useState<ConversationMessage[]>(starterConversation);
+  const [conversationInput, setConversationInput] = useState('');
+  const [conversationStatus, setConversationStatus] = useState('');
+  const [isConversationRecording, setIsConversationRecording] = useState(false);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -147,7 +162,48 @@ export function VoiceView() {
     void runTranslation(text, job);
   }
 
-  async function startRecording() {
+  function speakCompanion(text: string) {
+    if (!('speechSynthesis' in window)) {
+      setConversationStatus('Este navegador no ofrece lectura en voz alta.');
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const voice = window.speechSynthesis.getVoices().find((item) => /ryan|daniel|george|male|guy/i.test(item.name) && /en[-_]gb|en[-_]us/i.test(item.lang))
+      ?? window.speechSynthesis.getVoices().find((item) => /en[-_]gb|en[-_]us/i.test(item.lang));
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = voice?.lang ?? 'en-GB';
+    if (voice) utterance.voice = voice;
+    utterance.pitch = 0.78;
+    utterance.rate = 0.88;
+    utterance.onstart = () => setConversationStatus('Reproduciendo con la voz del compañero.');
+    utterance.onend = () => setConversationStatus('');
+    utterance.onerror = () => setConversationStatus('No se pudo reproducir esta frase.');
+    window.speechSynthesis.speak(utterance);
+  }
+
+  async function addConversationMessage(text: string) {
+    const clean = text.trim().slice(0, 160);
+    if (!clean) return;
+    const id = Date.now();
+    setConversationMessages((current) => [...current, { id, speaker: 'you', english: clean, translation: 'Traduciendo…' }]);
+    setConversationInput('');
+    setConversationStatus('Traduciendo tu respuesta en este dispositivo…');
+    try {
+      const result = await translateWithFallback(clean);
+      setConversationMessages((current) => current.map((message) => message.id === id ? { ...message, translation: result.translation } : message));
+      setConversationStatus('');
+    } catch {
+      setConversationMessages((current) => current.map((message) => message.id === id ? { ...message, translation: 'Traducción no disponible; puedes continuar la conversación.' } : message));
+      setConversationStatus('Puedes continuar; la traducción local no respondió esta vez.');
+    }
+  }
+
+  function submitConversation(event: FormEvent) {
+    event.preventDefault();
+    void addConversationMessage(conversationInput);
+  }
+
+  async function startRecording(target: 'translator' | 'conversation' = 'translator') {
     // Start native translator creation synchronously from the user's click; some browsers require activation.
     browserTranslatorRef.current?.prepare();
     setError('');
@@ -178,6 +234,7 @@ export function VoiceView() {
         if (timerRef.current !== null) window.clearTimeout(timerRef.current);
         timerRef.current = null;
         if (mountedRef.current) setIsRecording(false);
+        if (mountedRef.current) setIsConversationRecording(false);
 
         const audio = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
         if (audio.size === 0) {
@@ -199,6 +256,10 @@ export function VoiceView() {
           if (!mountedRef.current) return;
           const recognized = transcription.map((segment) => segment.text).join(' ').trim().slice(0, 160);
           if (!recognized) throw new Error('No se reconocieron palabras. Prueba con una frase clara y breve.');
+          if (target === 'conversation') {
+            await addConversationMessage(recognized);
+            return;
+          }
           setPhrase(recognized);
           setTranslation('');
           setTranslationEngine(null);
@@ -216,6 +277,7 @@ export function VoiceView() {
       }, { once: true });
       recorder.start();
       setIsRecording(true);
+      setIsConversationRecording(target === 'conversation');
       setRecordMessage(`Grabando en este dispositivo; máximo ${MAX_RECORDING_SECONDS} segundos.`);
       timerRef.current = window.setTimeout(() => {
         if (recorder.state === 'recording') recorder.stop();
@@ -248,6 +310,43 @@ export function VoiceView() {
         <div className="voice-mark"><Icon name="music" size={22} /></div>
       </div>
 
+      <section className="surface-card conversation-workspace" aria-labelledby="conversation-title">
+        <div className="conversation-heading">
+          <div>
+            <span className="eyebrow"><Icon name="mic" size={12} /> CONVERSACIÓN LIBRE · CON VOZ MASCULINA</span>
+            <h2 id="conversation-title">Platica de lo que quieras</h2>
+            <p>Escribe o habla sobre cualquier tema. El compañero sigue el hilo, responde en inglés natural y muestra una traducción breve; te corrige solo cuando ayuda.</p>
+          </div>
+          <span className="conversation-badge"><span className="status-dot" />Chat abierto</span>
+        </div>
+
+        <div className="companion-voice-card">
+          <div><span className="eyebrow">VOZ DEL COMPAÑERO</span><strong>Microsoft Ryan Online (Natural) — English (United Kingdom)</strong><small>Las voces disponibles vienen del dispositivo o navegador.</small></div>
+          <button className="button button-subtle button-small" type="button" onClick={() => speakCompanion('Hello, Hamilton. What would you like to practice today?')}><Icon name="volume" size={13} /> Probar voz</button>
+        </div>
+
+        <div className="conversation-thread" aria-live="polite">
+          {conversationMessages.map((message) => (
+            <article className={`chat-message ${message.speaker === 'you' ? 'chat-message-you' : 'chat-message-companion'}`} key={message.id}>
+              <div className="chat-message-meta"><span>{message.speaker === 'you' ? 'TÚ' : 'COMPAÑERO IA'}</span>{message.speaker === 'companion' && <button className="text-button" type="button" onClick={() => speakCompanion(message.english)}><Icon name="volume" size={12} /> Escuchar</button>}</div>
+              <p className="chat-english">{message.english}</p>
+              <p className="chat-translation">{message.translation}</p>
+              {message.tip && <p className="chat-tip"><strong>Consejo:</strong> {message.tip}</p>}
+            </article>
+          ))}
+        </div>
+
+        <form className="conversation-composer" onSubmit={submitConversation}>
+          <label htmlFor="conversation-language">Hablar en:</label>
+          <select id="conversation-language" defaultValue="en"><option value="en">Inglés</option><option value="es">Español</option></select>
+          <textarea value={conversationInput} onChange={(event) => setConversationInput(event.currentTarget.value)} placeholder="Escribe lo que quieras preguntarle…" rows={2} maxLength={160} />
+          <button className="button button-subtle button-small" type="submit" disabled={!conversationInput.trim()}>Enviar</button>
+          <button className={`button button-primary button-small ${isConversationRecording ? 'button-danger' : ''}`} type="button" onClick={isConversationRecording ? stopRecording : () => void startRecording('conversation')} disabled={isRequestingMic}><Icon name="mic" size={13} /> {isRequestingMic ? 'Permiso…' : isConversationRecording ? 'Detener' : 'Hablar'}</button>
+        </form>
+        {conversationStatus && <p className="conversation-status" role="status">{conversationStatus}</p>}
+        <p className="conversation-note">Puedes hablar en inglés o español. El compañero convierte tu respuesta al idioma de práctica y el audio no se sube.</p>
+      </section>
+
       <div className="voice-layout">
         <section className="surface-card voice-input-panel" aria-labelledby="voice-input-title">
           <label id="voice-input-title" className="field-label voice-label" htmlFor="voice-phrase">LÍNEA BREVE EN INGLÉS · MÁXIMO 160 CARACTERES</label>
@@ -267,7 +366,7 @@ export function VoiceView() {
             <button className="button button-primary" type="button" onClick={translateNow} disabled={!phrase.trim() || isTranslating}>
               <Icon name="sparkle" size={15} /> {isTranslating ? 'Traduciendo…' : 'Traducir ahora'}
             </button>
-            <button className={`button ${isRecording ? 'button-danger' : 'button-outline'}`} type="button" onClick={isRecording ? stopRecording : startRecording} disabled={isRequestingMic}>
+            <button className={`button ${isRecording ? 'button-danger' : 'button-outline'}`} type="button" onClick={isRecording ? stopRecording : () => void startRecording()} disabled={isRequestingMic}>
               <Icon name="mic" size={16} /> {isRequestingMic ? 'Esperando permiso…' : isRecording ? 'Detener y revisar' : 'Grabar mi voz'}
             </button>
           </div>
