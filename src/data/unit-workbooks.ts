@@ -66,6 +66,26 @@ export const unitWorkbooks: UnitWorkbook[] = [
     reading: { title: 'Lee y comprende', text: 'Hi! My name is Sofia. I am nineteen years old. I am from Peru, but I live in Lima. My phone number is 555-0182.', question: 'Where does Sofia live?', answer: 'Lima' },
     selfCheck: { items: ['Puedo decir mi edad.', 'Puedo decir de dónde soy.', 'Puedo decir dónde vivo.', 'Puedo preguntar por un teléfono o correo.'] },
   },
+  {
+    unitId: 'a1-unit-3',
+    level: 'a1',
+    title: 'Unidad 3 · Familia y personas',
+    instructions: 'Practica cómo hablar de tu familia y describir a personas cercanas. Usa have got, los posesivos y adjetivos básicos.',
+    fill: [
+      { id: 'fill-1', prompt: 'I ____ got two sisters.', answer: 'have' },
+      { id: 'fill-2', prompt: 'She ____ got a brother.', answer: 'has' },
+      { id: 'fill-3', prompt: 'This is ____ mother.', answer: 'my' },
+      { id: 'fill-4', prompt: 'He is ____ father.', answer: 'my' },
+      { id: 'fill-5', prompt: 'My parents ____ kind.', answer: 'are' },
+      { id: 'fill-6', prompt: 'This is Maria. ____ sister is Ana.', answer: 'Her' },
+    ],
+    translation: { prompt: 'Tengo un hermano y dos hermanas. Mi familia es amable.', answer: 'I have got one brother and two sisters. My family is kind.', hint: 'Usa I have got para hablar de lo que tienes. Family es singular: My family is…' },
+    order: { words: ['has', 'She', 'a', 'brother.'], answer: 'She has a brother.', prompt: 'Pon las palabras en orden para describir a una persona.' },
+    dictation: { answer: 'My parents are very kind.', prompt: 'Escucha y escribe la frase.' },
+    writing: { prompt: 'Describe a tu familia en 4–5 frases. Incluye cuántas personas hay y usa al menos dos posesivos.', sample: 'I have got one brother and one sister. My brother is funny. His name is Carlos. My sister is kind. Her name is Ana.', lines: 5 },
+    reading: { title: 'Lee y comprende', text: 'This is Emma. She has got one brother and two sisters. Her brother is Tom. He is twelve years old. Emma says her family is very friendly.', question: 'How many sisters has Emma got?', answer: 'Two' },
+    selfCheck: { items: ['Puedo decir cuántos hermanos tengo.', 'Puedo usar have got y has got.', 'Puedo usar my, his y her.', 'Puedo describir a una persona con un adjetivo.'] },
+  },
 ];
 
 export function getUnitWorkbook(level: LevelId, unitId?: string): UnitWorkbook | undefined {
