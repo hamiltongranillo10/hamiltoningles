@@ -86,6 +86,26 @@ export const unitWorkbooks: UnitWorkbook[] = [
     reading: { title: 'Lee y comprende', text: 'This is Emma. She has got one brother and two sisters. Her brother is Tom. He is twelve years old. Emma says her family is very friendly.', question: 'How many sisters has Emma got?', answer: 'Two' },
     selfCheck: { items: ['Puedo decir cuántos hermanos tengo.', 'Puedo usar have got y has got.', 'Puedo usar my, his y her.', 'Puedo describir a una persona con un adjetivo.'] },
   },
+  {
+    unitId: 'a1-unit-4',
+    level: 'a1',
+    title: 'Unidad 4 · Casa y objetos',
+    instructions: 'Describe una habitación y di dónde están los objetos. Practica there is, there are y las preposiciones in, on, under y next to.',
+    fill: [
+      { id: 'fill-1', prompt: 'There ____ a sofa in the living room.', answer: 'is' },
+      { id: 'fill-2', prompt: 'There ____ two chairs near the table.', answer: 'are' },
+      { id: 'fill-3', prompt: 'The book is ____ the table.', answer: 'on' },
+      { id: 'fill-4', prompt: 'The shoes are ____ the bed.', answer: 'under' },
+      { id: 'fill-5', prompt: 'The lamp is ____ to the sofa.', answer: 'next' },
+      { id: 'fill-6', prompt: 'There ____ a picture on the wall.', answer: 'is' },
+    ],
+    translation: { prompt: 'Hay una mesa en la cocina y dos sillas junto a ella.', answer: 'There is a table in the kitchen and two chairs next to it.', hint: 'Usa There is con un objeto y There are con dos o más. Next to significa «junto a». ' },
+    order: { words: ['a', 'There', 'bedroom.', 'is', 'in', 'bed'], answer: 'There is a bed in the bedroom.', prompt: 'Pon las palabras en orden para describir una habitación.' },
+    dictation: { answer: 'The keys are on the table.', prompt: 'Escucha y escribe la frase.' },
+    writing: { prompt: 'Describe una habitación en 4–5 frases. Incluye al menos tres objetos y tres preposiciones.', sample: 'There is a bed in my bedroom. There is a lamp on the table. My shoes are under the bed. A chair is next to the window.', lines: 5 },
+    reading: { title: 'Lee y comprende', text: 'This is my kitchen. There is a small table in the middle. There are four chairs around it. The plates are in the cupboard and the cups are on the shelf.', question: 'Where are the cups?', answer: 'On the shelf' },
+    selfCheck: { items: ['Puedo decir qué hay en una habitación.', 'Puedo usar there is y there are.', 'Puedo usar in, on y under.', 'Puedo describir dónde está un objeto.'] },
+  },
 ];
 
 export function getUnitWorkbook(level: LevelId, unitId?: string): UnitWorkbook | undefined {
