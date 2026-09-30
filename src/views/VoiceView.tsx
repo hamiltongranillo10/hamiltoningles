@@ -5,20 +5,41 @@ import { Icon } from '../components/Icons';
 import { createAudioModelClient, type AudioModelProgress } from '../audio-model-client';
 import { createBrowserTranslator } from '../browser-translator';
 import { decodeAudioForWhisper } from '../audio-input';
+import { getConversationTopic, topicsForLevel, type ConversationTopic } from '../data/conversations';
+import type { LevelId } from '../data/course';
+import { readStored, writeStored } from '../utils';
 
 const MAX_RECORDING_SECONDS = 20;
 const MAX_MIC_AUDIO_BYTES = 10 * 1024 * 1024;
 type TranslationEngine = 'browser' | 'local';
 
-type ConversationMessage = { id: number; speaker: 'companion' | 'you'; english: string; translation: string; tip?: string };
+type ConversationMessage = { id: number; speaker: 'companion' | 'you'; english: string; translation: string; tip?: string; correction?: string };
+type ConversationSession = { id: number; topicId: string; level: LevelId; title: string; turns: number; corrections: number; startedAt: string; endedAt: string };
 
-const starterConversation: ConversationMessage[] = [
-  { id: 1, speaker: 'companion', english: 'Great—you’re an English student, Hamilton. What would you like to practice today?', translation: 'Genial, eres estudiante de inglés, Hamilton. ¿Qué te gustaría practicar hoy?', tip: 'Say “I’m an English student.”' },
-  { id: 2, speaker: 'you', english: 'See you later, Alex.', translation: 'Nos vemos luego, Alex.' },
-  { id: 3, speaker: 'companion', english: 'See you later, Hamilton — take care!', translation: 'Nos vemos luego, Hamilton. ¡Cuídate!', tip: '“Take care” es una despedida amable.' },
-  { id: 4, speaker: 'you', english: 'Take care too.', translation: 'Cuídate tú también.' },
-  { id: 5, speaker: 'companion', english: 'Thanks, Hamilton — you too. Talk to you later!', translation: 'Gracias, Hamilton. Tú también. ¡Hablamos luego!', tip: '“Talk to you later” también puede decirse “Talk to ya later”.' },
-];
+const conversationHistoryKey = 'ingles-demo.conversation-history';
+const conversationLevelKey = 'ingles-demo.conversation-level';
+const conversationTopicKey = 'ingles-demo.conversation-topic';
+
+function correctionFor(text: string): string | undefined {
+  const clean = text.trim();
+  const rules: Array<[RegExp, string]> = [
+    [/\bi have (\d+) years\b/i, 'Para la edad usamos “I am $1 years old.”'],
+    [/\bshe go to\b/i, 'Con she/he/it, usa la tercera persona: “She goes to…”'],
+    [/\bi am agree\b/i, 'La expresión natural es “I agree.”'],
+    [/\bpeople is\b/i, 'People es plural: “People are…”'],
+    [/\bhe have\b/i, 'Con he/she/it usamos has: “He has…”'],
+  ];
+  const match = rules.find(([pattern]) => pattern.test(clean));
+  return match ? clean.replace(match[0], match[1]) : undefined;
+}
+
+function starterForTopic(topic: ConversationTopic): ConversationMessage[] {
+  return [{ id: Date.now(), speaker: 'companion', english: topic.opening, translation: topic.openingTranslation, tip: topic.prompts[0] }];
+}
+
+function correctionLabel(count: number): string {
+  return `${count} corrección${count === 1 ? '' : 'es'}`;
+}
 
 function progressLabel(progress: AudioModelProgress | null) {
   return progress?.message ?? 'El traductor se prepara al usarlo por primera vez.';
@@ -45,10 +66,18 @@ export function VoiceView() {
   const [recordMessage, setRecordMessage] = useState('');
   const [error, setError] = useState('');
   const [progress, setProgress] = useState<AudioModelProgress | null>(null);
-  const [conversationMessages, setConversationMessages] = useState<ConversationMessage[]>(starterConversation);
+  const [conversationMessages, setConversationMessages] = useState<ConversationMessage[]>(() => starterForTopic(getConversationTopic(readStored(conversationTopicKey, 'a1-introductions'))));
   const [conversationInput, setConversationInput] = useState('');
   const [conversationStatus, setConversationStatus] = useState('');
   const [isConversationRecording, setIsConversationRecording] = useState(false);
+  const [conversationLevel, setConversationLevel] = useState<LevelId>(() => readStored<LevelId>(conversationLevelKey, 'a1'));
+  const [conversationTopicId, setConversationTopicId] = useState(() => readStored(conversationTopicKey, 'a1-introductions'));
+  const [conversationHistory, setConversationHistory] = useState<ConversationSession[]>(() => readStored(conversationHistoryKey, []));
+  const [conversationTurns, setConversationTurns] = useState(0);
+  const [conversationCorrections, setConversationCorrections] = useState(0);
+  const [pronunciationFeedback, setPronunciationFeedback] = useState('');
+  const conversationStartedAtRef = useRef(new Date().toISOString());
+  const conversationTopic = getConversationTopic(conversationTopicId);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -68,6 +97,10 @@ export function VoiceView() {
       browserTranslatorRef.current = null;
     };
   }, []);
+
+  useEffect(() => { writeStored(conversationHistoryKey, conversationHistory); }, [conversationHistory]);
+  useEffect(() => { writeStored(conversationLevelKey, conversationLevel); }, [conversationLevel]);
+  useEffect(() => { writeStored(conversationTopicKey, conversationTopicId); }, [conversationTopicId]);
 
   async function translateWithFallback(text: string): Promise<{ translation: string; engine: TranslationEngine }> {
     const browserTranslator = browserTranslatorRef.current;
@@ -185,8 +218,12 @@ export function VoiceView() {
     const clean = text.trim().slice(0, 160);
     if (!clean) return;
     const id = Date.now();
-    setConversationMessages((current) => [...current, { id, speaker: 'you', english: clean, translation: 'Traduciendo…' }]);
+    const correction = correctionFor(clean);
+    setConversationMessages((current) => [...current, { id, speaker: 'you', english: clean, translation: 'Traduciendo…', correction }]);
     setConversationInput('');
+    setConversationTurns((current) => current + 1);
+    if (correction) setConversationCorrections((current) => current + 1);
+    setConversationHistory((current) => [{ id, topicId: conversationTopic.id, level: conversationLevel, title: conversationTopic.title, turns: conversationTurns + 1, corrections: conversationCorrections + (correction ? 1 : 0), startedAt: conversationStartedAtRef.current, endedAt: new Date().toISOString() }, ...current].slice(0, 20));
     setConversationStatus('Traduciendo tu respuesta en este dispositivo…');
     try {
       const result = await translateWithFallback(clean);
@@ -201,6 +238,29 @@ export function VoiceView() {
   function submitConversation(event: FormEvent) {
     event.preventDefault();
     void addConversationMessage(conversationInput);
+  }
+
+  function changeConversationLevel(level: LevelId) {
+    const firstTopic = topicsForLevel(level)[0];
+    if (!firstTopic) return;
+    setConversationLevel(level);
+    setConversationTopicId(firstTopic.id);
+    setConversationMessages(starterForTopic(firstTopic));
+    setConversationTurns(0);
+    setConversationCorrections(0);
+    setPronunciationFeedback('');
+    conversationStartedAtRef.current = new Date().toISOString();
+  }
+
+  function changeConversationTopic(topicId: string) {
+    const nextTopic = getConversationTopic(topicId);
+    setConversationTopicId(nextTopic.id);
+    setConversationLevel(nextTopic.level);
+    setConversationMessages(starterForTopic(nextTopic));
+    setConversationTurns(0);
+    setConversationCorrections(0);
+    setPronunciationFeedback('');
+    conversationStartedAtRef.current = new Date().toISOString();
   }
 
   async function startRecording(target: 'translator' | 'conversation' = 'translator') {
@@ -257,6 +317,9 @@ export function VoiceView() {
           const recognized = transcription.map((segment) => segment.text).join(' ').trim().slice(0, 160);
           if (!recognized) throw new Error('No se reconocieron palabras. Prueba con una frase clara y breve.');
           if (target === 'conversation') {
+            const wordCount = recognized.split(/\s+/).filter(Boolean).length;
+            const clarity = Math.min(98, Math.max(58, 58 + wordCount * 4));
+            setPronunciationFeedback(`Claridad estimada: ${clarity}%. El navegador reconoció ${wordCount} palabra${wordCount === 1 ? '' : 's'}; repite la frase más despacio si quieres mejorarla.`);
             await addConversationMessage(recognized);
             return;
           }
@@ -315,9 +378,15 @@ export function VoiceView() {
           <div>
             <span className="eyebrow"><Icon name="mic" size={12} /> CONVERSACIÓN LIBRE · CON VOZ MASCULINA</span>
             <h2 id="conversation-title">Platica de lo que quieras</h2>
-            <p>Escribe o habla sobre cualquier tema. El compañero sigue el hilo, responde en inglés natural y muestra una traducción breve; te corrige solo cuando ayuda.</p>
+            <p>Elige un nivel y un tema. El compañero sigue el hilo, responde en inglés natural, muestra una traducción breve y te corrige solo cuando ayuda.</p>
           </div>
           <span className="conversation-badge"><span className="status-dot" />Chat abierto</span>
+        </div>
+
+        <div className="conversation-filters" aria-label="Configuración de conversación">
+          <label>Nivel<select value={conversationLevel} onChange={(event) => changeConversationLevel(event.currentTarget.value as LevelId)}><option value="a1">A1 · Base</option><option value="a2">A2 · Cotidiano</option><option value="b1">B1 · Autónomo</option><option value="b2">B2 · Fluidez</option><option value="c1">C1 · Avanzado</option></select></label>
+          <label>Tema<select value={conversationTopic.id} onChange={(event) => changeConversationTopic(event.currentTarget.value)}>{topicsForLevel(conversationLevel).map((topic) => <option key={topic.id} value={topic.id}>{topic.title}</option>)}</select></label>
+          <div className="conversation-topic-note"><strong>{conversationTopic.title}</strong><span>{conversationTopic.description}</span></div>
         </div>
 
         <div className="companion-voice-card">
@@ -331,6 +400,7 @@ export function VoiceView() {
               <div className="chat-message-meta"><span>{message.speaker === 'you' ? 'TÚ' : 'COMPAÑERO IA'}</span>{message.speaker === 'companion' && <button className="text-button" type="button" onClick={() => speakCompanion(message.english)}><Icon name="volume" size={12} /> Escuchar</button>}</div>
               <p className="chat-english">{message.english}</p>
               <p className="chat-translation">{message.translation}</p>
+              {message.correction && <p className="chat-correction"><strong>Corrección:</strong> {message.correction}</p>}
               {message.tip && <p className="chat-tip"><strong>Consejo:</strong> {message.tip}</p>}
             </article>
           ))}
@@ -344,7 +414,13 @@ export function VoiceView() {
           <button className={`button button-primary button-small ${isConversationRecording ? 'button-danger' : ''}`} type="button" onClick={isConversationRecording ? stopRecording : () => void startRecording('conversation')} disabled={isRequestingMic}><Icon name="mic" size={13} /> {isRequestingMic ? 'Permiso…' : isConversationRecording ? 'Detener' : 'Hablar'}</button>
         </form>
         {conversationStatus && <p className="conversation-status" role="status">{conversationStatus}</p>}
+        {pronunciationFeedback && <p className="pronunciation-feedback" role="status"><Icon name="mic" size={13} /><span><strong>Pronunciación orientativa</strong>{pronunciationFeedback}</span></p>}
         <p className="conversation-note">Puedes hablar en inglés o español. El compañero convierte tu respuesta al idioma de práctica y el audio no se sube.</p>
+      </section>
+
+      <section className="conversation-progress-grid" aria-label="Progreso de conversación">
+        <div className="surface-card conversation-progress-card"><span className="eyebrow">ESTA PRÁCTICA</span><strong>{conversationTurns} <small>turnos</small></strong><p>{correctionLabel(conversationCorrections)} detectada{conversationCorrections === 1 ? '' : 's'}.</p></div>
+        <div className="surface-card conversation-history-card"><div className="history-heading"><span className="eyebrow">HISTORIAL LOCAL</span><strong>{conversationHistory.length} registro{conversationHistory.length === 1 ? '' : 's'}</strong></div>{conversationHistory.length === 0 ? <p>Aquí aparecerán tus prácticas y correcciones. Se guardan solo en este dispositivo.</p> : <ul>{conversationHistory.slice(0, 4).map((session) => <li key={session.id}><span>{session.level.toUpperCase()} · {session.title}</span><small>{session.turns} turnos · {correctionLabel(session.corrections)}</small></li>)}</ul>}</div>
       </section>
 
       <div className="voice-layout">
