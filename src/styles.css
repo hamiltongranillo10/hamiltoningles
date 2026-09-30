@@ -224,6 +224,12 @@ p { color: var(--muted); }
 .worksheet-id { display: grid; min-width: 78px; gap: 4px; justify-items: center; padding: 9px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.025); }
 .worksheet-id span { color: var(--subtle); font-size: 8px; font-weight: 700; letter-spacing: .12em; }
 .worksheet-id strong { color: #d6caff; font-size: 19px; }
+.print-only { display: none; }
+.worksheet-reference-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; padding: 15px 0 3px; }
+.worksheet-reference-grid > div { min-width: 0; padding: 11px; border: 1px solid var(--line-soft); border-radius: 11px; background: rgba(255,255,255,.02); }
+.worksheet-reference-grid p { margin: 6px 0 0; color: var(--muted); font-size: 9px; line-height: 1.55; }
+.worksheet-student-line { align-items: center; gap: 8px; color: #222; font-size: 9pt; }
+.worksheet-student-line i { display: inline-block; width: 55mm; height: 5mm; border-bottom: 1px solid #555; }
 .exercise-section { padding: 19px 0; border-bottom: 1px solid var(--line-soft); }
 .exercise-section:last-of-type { border-bottom: 0; }
 .exercise-section-title { align-items: flex-start; margin-bottom: 14px; }
@@ -402,6 +408,7 @@ p { color: var(--muted); }
   .workbook-sheet { padding: 15px; }
   .workbook-sheet-head h2 { font-size: 24px; }
   .worksheet-id { min-width: 63px; }
+  .worksheet-reference-grid { grid-template-columns: 1fr; }
   .worksheet-phrase-grid { grid-template-columns: 1fr; }
   .two-exercises { grid-template-columns: 1fr; }
   .fill-prompt { font-size: 10px; }
@@ -441,6 +448,10 @@ p { color: var(--muted); }
   .workbook-sheet-head { padding: 0 0 5mm; border-bottom: 1px solid #999; }
   .workbook-sheet-head h2 { color: #111 !important; font-size: 17pt; }
   .workbook-sheet-head p { color: #444 !important; font-size: 9pt; }
+  .print-only { display: flex !important; }
+  .worksheet-reference-grid { grid-template-columns: repeat(3,minmax(0,1fr)); padding: 4mm 0 1mm; break-inside: avoid; }
+  .worksheet-reference-grid > div { border-color: #ccc !important; border-radius: 4px !important; background: #fff !important; }
+  .worksheet-reference-grid p { color: #333 !important; font-size: 8pt; }
   .worksheet-id { border-color: #bbb !important; background: #fff !important; }
   .worksheet-id span { color: #555 !important; }
   .worksheet-id strong { color: #222 !important; }
@@ -466,6 +477,7 @@ p { color: var(--muted); }
   .print-screen-answer { display: block !important; color: #111 !important; font-size: 10pt; }
   .word-answer-box { min-height: 12mm; border: 1px solid #bbb !important; border-radius: 4px !important; background: #fff !important; }
   .worksheet-footer { border-color: #aaa !important; color: #444 !important; }
+  .workbook-learn-section { break-inside: avoid; }
   .workbook-controls.no-print { display: block !important; margin: 0 !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: #fff !important; box-shadow: none !important; }
   .workbook-controls.no-print > :not(.answer-key) { display: none !important; }
   .workbook-controls .answer-key { display: none !important; margin-top: 7mm; border-color: #999 !important; border-radius: 4px !important; background: #fff !important; color: #111 !important; break-before: page; }

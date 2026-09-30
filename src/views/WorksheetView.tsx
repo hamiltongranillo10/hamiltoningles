@@ -95,9 +95,17 @@ export function WorksheetView({ level, answers, reviewed, onAnswer, onReview, on
           <div className="worksheet-id"><span>NIVEL</span><strong>{level.cefr}</strong><span>{level.weeks}</span></div>
         </div>
 
+        <div className="worksheet-student-line print-only" aria-label="Datos del estudiante"><span>Nombre:</span><i /><span>Fecha:</span><i /></div>
+
+        <div className="worksheet-reference-grid">
+          <div><span className="eyebrow">OBJETIVO</span><p>{level.objective}</p></div>
+          <div><span className="eyebrow">GRAMÁTICA CLAVE</span><p>{level.grammar}</p></div>
+          <div><span className="eyebrow">VOCABULARIO</span><p>{level.vocabulary.join(' · ')}</p></div>
+        </div>
+
         <div className="exercise-section workbook-learn-section">
           <div className="exercise-section-title"><span className="section-number">01</span><div><span className="eyebrow">REPASA</span><h3>Frases de la lección</h3></div></div>
-          <div className="worksheet-phrase-grid">{level.phrases.slice(0, 4).map((phrase, index) => <div className="worksheet-phrase" key={phrase.english}><span>{String(index + 1).padStart(2, '0')}</span><strong>{phrase.english}</strong><small>{phrase.spanish}</small><em>Pronunciación aprox.: {phrase.pronunciation}</em></div>)}</div>
+          <div className="worksheet-phrase-grid">{level.phrases.map((phrase, index) => <div className="worksheet-phrase" key={phrase.english}><span>{String(index + 1).padStart(2, '0')}</span><strong>{phrase.english}</strong><small>{phrase.spanish}</small><em>Pronunciación aprox.: {phrase.pronunciation}</em></div>)}</div>
         </div>
 
         <div className="exercise-section">
