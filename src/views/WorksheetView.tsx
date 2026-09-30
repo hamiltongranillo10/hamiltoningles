@@ -4,9 +4,11 @@ import { Icon } from '../components/Icons';
 import type { AppView } from '../components/AppShell';
 import { levels, type LevelData, type LevelId } from '../data/course';
 import { answerMatches } from '../utils';
+import { getUnitWorkbook } from '../data/unit-workbooks';
 
 interface WorksheetViewProps {
   level: LevelData;
+  selectedUnitId: string;
   answers: Record<string, string>;
   reviewed: boolean;
   onAnswer: (key: string, value: string) => void;
@@ -15,17 +17,21 @@ interface WorksheetViewProps {
   onSelectLevel: (id: LevelId) => void;
 }
 
-export function WorksheetView({ level, answers, reviewed, onAnswer, onReview, onNavigate, onSelectLevel }: WorksheetViewProps) {
+export function WorksheetView({ level, selectedUnitId, answers, reviewed, onAnswer, onReview, onNavigate, onSelectLevel }: WorksheetViewProps) {
   const [showKey, setShowKey] = useState(false);
   const [includeKeyPrint, setIncludeKeyPrint] = useState(false);
   const [chosenWords, setChosenWords] = useState<number[]>([]);
-  const workbook = level.workbook;
+  const unitWorkbook = getUnitWorkbook(level.id, selectedUnitId);
+  const workbook = unitWorkbook ?? level.workbook;
+  const reading = unitWorkbook?.reading;
+  const selfCheck = unitWorkbook?.selfCheck;
   const fillScore = useMemo(() => workbook.fill.filter((item) => answerMatches(answers[`${level.id}.${item.id}`] ?? '', item.answer)).length, [answers, level.id, workbook.fill]);
   const isTranslationCorrect = answerMatches(answers[`${level.id}.translation`] ?? '', workbook.translation.answer);
   const isOrderCorrect = answerMatches(answers[`${level.id}.order`] ?? '', workbook.order.answer);
   const isDictationCorrect = answerMatches(answers[`${level.id}.dictation`] ?? '', workbook.dictation.answer);
-  const totalScore = fillScore + Number(isTranslationCorrect) + Number(isOrderCorrect) + Number(isDictationCorrect);
-  const totalGraded = workbook.fill.length + 3;
+  const isReadingCorrect = reading ? answerMatches(answers[`${level.id}.reading`] ?? '', reading.answer) : false;
+  const totalScore = fillScore + Number(isTranslationCorrect) + Number(isOrderCorrect) + Number(isDictationCorrect) + Number(isReadingCorrect);
+  const totalGraded = workbook.fill.length + 3 + (reading ? 1 : 0);
 
   useEffect(() => {
     setShowKey(false);
@@ -45,6 +51,7 @@ export function WorksheetView({ level, answers, reviewed, onAnswer, onReview, on
     setField('order', '');
     setField('dictation', '');
     setField('writing', '');
+    setField('reading', '');
     setChosenWords([]);
   }
 
@@ -155,6 +162,11 @@ export function WorksheetView({ level, answers, reviewed, onAnswer, onReview, on
           </div>
         </div>
 
+        {reading && <div className="exercise-section two-exercises unit-extension-section">
+          <div className="exercise-card reading-card"><div className="exercise-section-title"><span className="section-number">07</span><div><span className="eyebrow">LEE Y COMPRENDE</span><h3>{reading.title}</h3></div></div><p className="reading-text">{reading.text}</p><label className="field-label" htmlFor="reading-answer">Responde en inglés</label><input id="reading-answer" className="text-input" value={answers[`${level.id}.reading`] ?? ''} onChange={(event) => setField('reading', event.target.value)} placeholder="Escribe una palabra…" />{reviewed && <span className={`answer-mark ${isReadingCorrect ? 'good' : 'needs-work'}`}>{isReadingCorrect ? 'Comprensión correcta' : 'Revisa la lectura.'}</span>}</div>
+          {selfCheck && <div className="exercise-card self-check-card"><div className="exercise-section-title"><span className="section-number">08</span><div><span className="eyebrow">AUTOEVALUACIÓN</span><h3>¿Qué ya puedes hacer?</h3></div></div><div className="self-check-list">{selfCheck.items.map((item) => <label key={item}><input type="checkbox" /> <span>{item}</span></label>)}</div><p className="hint-text">Marca solo lo que puedas hacer sin mirar la clave.</p></div>}
+        </div>}
+
         <div className="worksheet-footer"><span>English, paso a paso</span><span>{level.cefr} · {level.module}</span><span>Cuaderno de práctica</span></div>
       </section>
 
@@ -162,7 +174,7 @@ export function WorksheetView({ level, answers, reviewed, onAnswer, onReview, on
         <div className="review-actions"><button type="button" className="button button-primary" onClick={reviewSheet}><Icon name="check" size={16} /> Revisar respuestas</button><button type="button" className="button button-subtle" onClick={clearSheet}><Icon name="trash" size={15} /> Borrar respuestas</button>{reviewed && <span className="score-badge">{totalScore} / {totalGraded} correctas · {totalScore * 10} pts posibles</span>}</div>
         <div className="answer-options"><label className="check-control"><input type="checkbox" checked={showKey} onChange={(event) => setShowKey(event.target.checked)} /> Mostrar clave de respuestas</label><label className="check-control"><input type="checkbox" checked={includeKeyPrint} onChange={(event) => setIncludeKeyPrint(event.target.checked)} /> Incluir la clave al imprimir</label></div>
         {reviewed && <p className="review-feedback" role="status">Revisa las marcas en cada respuesta. La producción escrita se deja abierta para que puedas expresarte con tus propias palabras.</p>}
-        {showKey && <div className="answer-key"><span className="eyebrow">CLAVE · {level.cefr}</span><h3>Respuestas sugeridas</h3><ol>{workbook.fill.map((item) => <li key={item.id}>{item.prompt.replace('____', item.answer)}</li>)}<li><strong>Traducción:</strong> {workbook.translation.answer}</li><li><strong>Orden:</strong> {workbook.order.answer}</li><li><strong>Dictado:</strong> {workbook.dictation.answer}</li><li><strong>Producción:</strong> {workbook.writing.sample}</li></ol></div>}
+        {showKey && <div className="answer-key"><span className="eyebrow">CLAVE · {level.cefr}</span><h3>Respuestas sugeridas</h3><ol>{workbook.fill.map((item) => <li key={item.id}>{item.prompt.replace('____', item.answer)}</li>)}<li><strong>Traducción:</strong> {workbook.translation.answer}</li><li><strong>Orden:</strong> {workbook.order.answer}</li><li><strong>Dictado:</strong> {workbook.dictation.answer}</li>{reading && <li><strong>Comprensión:</strong> {reading.answer}</li>}<li><strong>Producción:</strong> {workbook.writing.sample}</li></ol></div>}
       </section>
 
       <div className="workbook-bottom-actions no-print"><button className="text-button" type="button" onClick={() => onNavigate('lesson')}><Icon name="back" size={16} /> Volver a aprender</button><button className="button button-outline" type="button" onClick={() => onNavigate('practice')}>Ir a práctica variada <Icon name="arrow" size={16} /></button></div>

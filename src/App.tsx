@@ -116,7 +116,7 @@ export default function App() {
     <AppShell view={view} onNavigate={navigate}>
       {view === 'home' && <HomeView level={level} selectedLevel={selectedLevel} onSelectLevel={selectLevel} onNavigate={navigate} completedIds={completedLevels} points={points} />}
       {view === 'lesson' && <LessonView level={level} selectedLevel={selectedLevel} selectedUnitId={selectedUnitId} onSelectLevel={selectLevel} onSelectUnit={selectUnit} onNavigate={navigate} completed={completedLevels.includes(level.id)} />}
-      {view === 'worksheet' && <WorksheetView level={level} answers={answers} reviewed={reviewedLevels.includes(level.id)} onAnswer={updateAnswer} onReview={reviewWorksheet} onNavigate={navigate} onSelectLevel={selectLevel} />}
+      {view === 'worksheet' && <WorksheetView level={level} selectedUnitId={selectedUnitId} answers={answers} reviewed={reviewedLevels.includes(level.id)} onAnswer={updateAnswer} onReview={reviewWorksheet} onNavigate={navigate} onSelectLevel={selectLevel} />}
       {view === 'practice' && <PracticeView level={level} selectedLevel={selectedLevel} onSelectLevel={selectLevel} points={points} favorites={favorites} onToggleFavorite={toggleFavorite} onAwardPoints={(earned) => setPoints((current) => current + earned)} />}
       {view === 'voice' && <Suspense fallback={<FeatureLoading />}><VoiceView /></Suspense>}
       {view === 'audio' && <Suspense fallback={<FeatureLoading />}><DriveAudioView /></Suspense>}

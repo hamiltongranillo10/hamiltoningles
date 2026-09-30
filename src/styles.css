@@ -266,6 +266,10 @@ p { color: var(--muted); }
 .exercise-card .exercise-section-title { gap: 9px; }
 .exercise-card .section-number { width: 26px; height: 26px; }
 .exercise-card .exercise-section-title h3 { font-size: 13px; }
+.reading-text { margin: 12px 0; padding: 11px; border-left: 2px solid var(--lavender); background: rgba(183,161,255,.06); color: #ded9e8; font-size: 11px; line-height: 1.65; }
+.self-check-list { display: grid; gap: 9px; margin: 12px 0; }
+.self-check-list label { display: flex; align-items: flex-start; gap: 7px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+.self-check-list input { accent-color: var(--lavender); }
 .prompt-quote { margin: 10px 0 13px; padding: 11px 12px; border: 1px solid var(--line-soft); border-radius: 10px; background: rgba(255,255,255,.025); color: #e1dfe7; font-size: 11px; font-weight: 600; line-height: 1.6; }
 .field-label { display: block; margin: 8px 0 6px; color: var(--subtle); font-size: 9px; font-weight: 700; }
 .text-input, .answer-textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; background: #14151a; color: var(--text); font-size: 11px; transition: border-color .15s ease; }
@@ -482,6 +486,8 @@ p { color: var(--muted); }
   .fill-print-lines span { display: none !important; }
   .exercise-card { border-color: #ccc !important; border-radius: 5px !important; background: #fff !important; break-inside: avoid; }
   .prompt-quote { border-color: #ccc !important; border-radius: 4px !important; background: #fff !important; color: #171717 !important; }
+  .reading-text { border-color: #777 !important; background: #fff !important; color: #222 !important; }
+  .self-check-list label { color: #222 !important; }
   .field-label { color: #444 !important; }
   .print-writing-lines { display: grid !important; gap: 8mm; margin: 2mm 0 0; }
   .print-writing-lines span { display: block !important; height: 1px; border-bottom: 1px solid #999; }
