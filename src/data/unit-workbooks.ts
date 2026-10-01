@@ -226,6 +226,26 @@ export const unitWorkbooks: UnitWorkbook[] = [
     reading: { title: 'Lee y comprende', text: 'Last month, Elena travelled to Seville by bus. She left home at seven and arrived at noon. She visited the old town and bought a small gift for her brother.', question: 'How did Elena travel to Seville?', answer: 'By bus' },
     selfCheck: { items: ['Puedo contar un viaje pasado.', 'Puedo usar verbos regulares e irregulares en pasado.', 'Puedo preguntar por una hora de salida.', 'Puedo hablar de billetes y transporte.'] },
   },
+  {
+    unitId: 'a2-unit-3',
+    level: 'a2',
+    title: 'Unidad 3 · Salud y bienestar',
+    instructions: 'Describe síntomas, pide ayuda y da consejos sencillos. Practica should, shouldn’t, have to y el vocabulario de salud.',
+    fill: [
+      { id: 'fill-1', prompt: 'You ____ drink more water.', answer: 'should' },
+      { id: 'fill-2', prompt: 'You ____ stay up late when you feel sick.', answer: 'shouldn’t' },
+      { id: 'fill-3', prompt: 'I have a ____ache.', answer: 'head' },
+      { id: 'fill-4', prompt: 'You have to ____ an appointment.', answer: 'make' },
+      { id: 'fill-5', prompt: 'She has a sore ____.', answer: 'throat' },
+      { id: 'fill-6', prompt: 'You should ____ some rest.', answer: 'get' },
+    ],
+    translation: { prompt: 'Me duele la cabeza. Deberías descansar y beber más agua.', answer: 'I have a headache. You should rest and drink more water.', hint: 'Headache es dolor de cabeza. Después de should usa el verbo en forma base: should rest.' },
+    order: { words: ['should', 'You', 'a', 'doctor.', 'see'], answer: 'You should see a doctor.', prompt: 'Ordena las palabras para dar un consejo.' },
+    dictation: { answer: 'You should make an appointment.', prompt: 'Escucha y escribe la frase.' },
+    writing: { prompt: 'Escribe 5–6 frases sobre un problema de salud imaginario y da dos consejos con should.', sample: 'I have a sore throat and I feel tired. I should drink tea and get some rest. I should not work today. I have to make an appointment.', lines: 6 },
+    reading: { title: 'Lee y comprende', text: 'Tom has a bad headache and feels tired. The doctor says he should drink water and rest. He shouldn’t work today. Tom has to make another appointment next week.', question: 'What should Tom do?', answer: 'Drink water and rest' },
+    selfCheck: { items: ['Puedo describir un síntoma.', 'Puedo dar consejos con should.', 'Puedo decir lo que no conviene hacer con shouldn’t.', 'Puedo hablar de una cita médica.'] },
+  },
 ];
 
 export function getUnitWorkbook(level: LevelId, unitId?: string): UnitWorkbook | undefined {
