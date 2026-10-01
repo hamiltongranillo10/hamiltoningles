@@ -246,6 +246,26 @@ export const unitWorkbooks: UnitWorkbook[] = [
     reading: { title: 'Lee y comprende', text: 'Tom has a bad headache and feels tired. The doctor says he should drink water and rest. He shouldn’t work today. Tom has to make another appointment next week.', question: 'What should Tom do?', answer: 'Drink water and rest' },
     selfCheck: { items: ['Puedo describir un síntoma.', 'Puedo dar consejos con should.', 'Puedo decir lo que no conviene hacer con shouldn’t.', 'Puedo hablar de una cita médica.'] },
   },
+  {
+    unitId: 'a2-unit-4',
+    level: 'a2',
+    title: 'Unidad 4 · Planes futuros',
+    instructions: 'Habla de tus planes, compromisos y predicciones. Practica be going to, will y el presente continuo para expresar el futuro.',
+    fill: [
+      { id: 'fill-1', prompt: 'I am ____ to visit my grandparents this weekend.', answer: 'going' },
+      { id: 'fill-2', prompt: 'She ____ call you tomorrow.', answer: 'will' },
+      { id: 'fill-3', prompt: 'We are ____ dinner with friends on Friday.', answer: 'having' },
+      { id: 'fill-4', prompt: 'They are going ____ travel next month.', answer: 'to' },
+      { id: 'fill-5', prompt: 'I think it ____ rain later.', answer: 'will' },
+      { id: 'fill-6', prompt: 'What are you ____ to do tonight?', answer: 'going' },
+    ],
+    translation: { prompt: 'Voy a estudiar esta noche y mañana voy a visitar a mi amiga.', answer: 'I am going to study tonight and tomorrow I am going to visit my friend.', hint: 'Usa be going to para planes ya pensados. Recuerda: am/is/are + going to + verbo.' },
+    order: { words: ['going', 'are', 'What', 'do', 'to', 'you', 'tomorrow?'], answer: 'What are you going to do tomorrow?', prompt: 'Ordena la pregunta sobre planes futuros.' },
+    dictation: { answer: 'I will call you after work.', prompt: 'Escucha y escribe la frase.' },
+    writing: { prompt: 'Escribe 5–6 frases sobre tus planes para esta semana. Incluye una predicción con will y dos planes con going to.', sample: 'This week, I am going to finish my project. I am going to meet my sister on Saturday. I think the weather will be good. I will call my friend after work.', lines: 6 },
+    reading: { title: 'Lee y comprende', text: 'Next weekend, Pablo is going to visit the coast with his family. They are going to stay in a small hotel. On Saturday evening, they are having dinner near the beach. Pablo thinks the trip will be relaxing.', question: 'Where is Pablo going to go?', answer: 'The coast' },
+    selfCheck: { items: ['Puedo hablar de mis planes futuros.', 'Puedo usar going to para planes.', 'Puedo usar will para predicciones o decisiones.', 'Puedo preguntar por los planes de otra persona.'] },
+  },
 ];
 
 export function getUnitWorkbook(level: LevelId, unitId?: string): UnitWorkbook | undefined {
