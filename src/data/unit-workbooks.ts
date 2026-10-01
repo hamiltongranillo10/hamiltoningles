@@ -206,6 +206,26 @@ export const unitWorkbooks: UnitWorkbook[] = [
     reading: { title: 'Lee y comprende', text: 'Every Saturday, Maya goes swimming in the morning. She often meets her friends for lunch afterwards. In the afternoon, she sometimes watches a film, but she never stays up late on Saturday night.', question: 'What does Maya do in the morning?', answer: 'She goes swimming' },
     selfCheck: { items: ['Puedo hablar de mis actividades de tiempo libre.', 'Puedo usar usually, often, sometimes y never.', 'Puedo preguntar How often…?', 'Puedo describir mis planes habituales de fin de semana.'] },
   },
+  {
+    unitId: 'a2-unit-2',
+    level: 'a2',
+    title: 'Unidad 2 · Viajes y transporte',
+    instructions: 'Cuenta un viaje reciente y resuelve situaciones prácticas de transporte. Practica el pasado simple, las fechas y el vocabulario de viajes.',
+    fill: [
+      { id: 'fill-1', prompt: 'We ____ to Madrid last summer.', answer: 'travelled' },
+      { id: 'fill-2', prompt: 'She ____ the train at eight.', answer: 'caught' },
+      { id: 'fill-3', prompt: 'They ____ at the hotel late.', answer: 'arrived' },
+      { id: 'fill-4', prompt: 'I ____ my ticket online.', answer: 'bought' },
+      { id: 'fill-5', prompt: 'When ____ you leave?', answer: 'did' },
+      { id: 'fill-6', prompt: 'The bus ____ five minutes ago.', answer: 'left' },
+    ],
+    translation: { prompt: 'El tren llegó tarde, pero compramos los billetes en la estación.', answer: 'The train arrived late, but we bought the tickets at the station.', hint: 'Usa el pasado simple: arrived y bought. Después de but conecta las dos ideas.' },
+    order: { words: ['last', 'We', 'travelled', 'summer.', 'by', 'train'], answer: 'We travelled by train last summer.', prompt: 'Ordena la frase para contar cómo viajaste.' },
+    dictation: { answer: 'What time did the train leave?', prompt: 'Escucha y escribe la pregunta.' },
+    writing: { prompt: 'Cuenta un viaje reciente en 5–6 frases. Di adónde fuiste, cómo viajaste y qué ocurrió.', sample: 'Last summer, I travelled to Madrid by train. I bought my ticket online. The train arrived on time. I stayed in a small hotel near the station.', lines: 6 },
+    reading: { title: 'Lee y comprende', text: 'Last month, Elena travelled to Seville by bus. She left home at seven and arrived at noon. She visited the old town and bought a small gift for her brother.', question: 'How did Elena travel to Seville?', answer: 'By bus' },
+    selfCheck: { items: ['Puedo contar un viaje pasado.', 'Puedo usar verbos regulares e irregulares en pasado.', 'Puedo preguntar por una hora de salida.', 'Puedo hablar de billetes y transporte.'] },
+  },
 ];
 
 export function getUnitWorkbook(level: LevelId, unitId?: string): UnitWorkbook | undefined {
