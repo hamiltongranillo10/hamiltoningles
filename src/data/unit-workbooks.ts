@@ -166,6 +166,26 @@ export const unitWorkbooks: UnitWorkbook[] = [
     reading: { title: 'Lee y comprende', text: 'The hotel is near the train station. Go straight for one block and turn right at the bank. The hotel is next to a small café, opposite the park.', question: 'What is the hotel next to?', answer: 'A small café' },
     selfCheck: { items: ['Puedo pedir indicaciones.', 'Puedo decir go straight y turn left/right.', 'Puedo usar can para pedir ayuda.', 'Puedo ubicar un lugar en la ciudad.'] },
   },
+  {
+    unitId: 'a1-unit-8',
+    level: 'a1',
+    title: 'Unidad 8 · Repaso y situación final',
+    instructions: 'Integra lo aprendido en A1: preséntate, habla de tu familia y rutina, pide algo y resuelve una situación en la ciudad.',
+    fill: [
+      { id: 'fill-1', prompt: 'My name ____ Sofia and I am from Chile.', answer: 'is' },
+      { id: 'fill-2', prompt: 'There ____ two chairs in the kitchen.', answer: 'are' },
+      { id: 'fill-3', prompt: 'I usually ____ up at seven.', answer: 'get' },
+      { id: 'fill-4', prompt: 'I would ____ a coffee, please.', answer: 'like' },
+      { id: 'fill-5', prompt: 'Can you tell me ____ to the station?', answer: 'how' },
+      { id: 'fill-6', prompt: 'She ____ got one brother.', answer: 'has' },
+    ],
+    translation: { prompt: 'Hola, me llamo Luis. Normalmente voy al trabajo en autobús y quisiera un café.', answer: 'Hello, my name is Luis. I usually go to work by bus and I would like a coffee.', hint: 'Combina My name is…, usually go y I would like… en una sola presentación.' },
+    order: { words: ['usually', 'I', 'English', 'study', 'evening.', 'in', 'the'], answer: 'I usually study English in the evening.', prompt: 'Ordena la frase para hablar de una rutina.' },
+    dictation: { answer: 'Can you help me find the library?', prompt: 'Escucha y escribe la pregunta.' },
+    writing: { prompt: 'Escribe una presentación final de 6–8 frases. Incluye tu nombre, origen, familia, rutina, una petición y una dirección.', sample: 'Hello, my name is Luis and I am from Chile. I have got one sister. I usually get up at seven and go to work by bus. I would like a coffee, please. Can you tell me how to get to the library? Thank you.', lines: 8 },
+    reading: { title: 'Lee y comprende', text: 'Hi, I am Marta. I am from Argentina and I live in Córdoba. I have got one brother. I usually get up at seven and walk to work. Today I am at a café. I would like a tea, please, and then I need directions to the library.', question: 'What does Marta want at the café?', answer: 'A tea' },
+    selfCheck: { items: ['Puedo presentarme y hablar de mi origen.', 'Puedo describir mi familia y mi rutina.', 'Puedo pedir comida o bebida.', 'Puedo pedir y dar indicaciones sencillas.'] },
+  },
 ];
 
 export function getUnitWorkbook(level: LevelId, unitId?: string): UnitWorkbook | undefined {
