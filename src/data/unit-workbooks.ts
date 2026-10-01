@@ -186,6 +186,26 @@ export const unitWorkbooks: UnitWorkbook[] = [
     reading: { title: 'Lee y comprende', text: 'Hi, I am Marta. I am from Argentina and I live in Córdoba. I have got one brother. I usually get up at seven and walk to work. Today I am at a café. I would like a tea, please, and then I need directions to the library.', question: 'What does Marta want at the café?', answer: 'A tea' },
     selfCheck: { items: ['Puedo presentarme y hablar de mi origen.', 'Puedo describir mi familia y mi rutina.', 'Puedo pedir comida o bebida.', 'Puedo pedir y dar indicaciones sencillas.'] },
   },
+  {
+    unitId: 'a2-unit-1',
+    level: 'a2',
+    title: 'Unidad 1 · Rutinas y tiempo libre',
+    instructions: 'Describe tus hábitos, actividades de ocio y fines de semana. Practica el presente simple, las preguntas con do y los adverbios de frecuencia.',
+    fill: [
+      { id: 'fill-1', prompt: 'I ____ play tennis on Saturdays.', answer: 'usually' },
+      { id: 'fill-2', prompt: 'She ____ to the gym twice a week.', answer: 'goes' },
+      { id: 'fill-3', prompt: 'How often ____ you watch films?', answer: 'do' },
+      { id: 'fill-4', prompt: 'He ____ plays video games after work.', answer: 'sometimes' },
+      { id: 'fill-5', prompt: 'We ____ go out on Sunday evenings.', answer: 'often' },
+      { id: 'fill-6', prompt: 'What ____ your brother do at weekends?', answer: 'does' },
+    ],
+    translation: { prompt: 'Normalmente juego al tenis los sábados, pero a veces veo películas en casa.', answer: 'I usually play tennis on Saturdays, but sometimes I watch films at home.', hint: 'Usa usually y sometimes antes del verbo principal. Después de I usa play y watch sin -s.' },
+    order: { words: ['often', 'We', 'at', 'weekends.', 'go', 'cycling'], answer: 'We often go cycling at weekends.', prompt: 'Ordena la frase para hablar de una actividad habitual.' },
+    dictation: { answer: 'How often do you meet your friends?', prompt: 'Escucha y escribe la pregunta.' },
+    writing: { prompt: 'Escribe 5–6 frases sobre tu tiempo libre. Incluye dos adverbios de frecuencia y una pregunta para otra persona.', sample: 'I usually read at home in the evening. I often go cycling at weekends. Sometimes I meet my friends for coffee. How often do you play sports?', lines: 6 },
+    reading: { title: 'Lee y comprende', text: 'Every Saturday, Maya goes swimming in the morning. She often meets her friends for lunch afterwards. In the afternoon, she sometimes watches a film, but she never stays up late on Saturday night.', question: 'What does Maya do in the morning?', answer: 'She goes swimming' },
+    selfCheck: { items: ['Puedo hablar de mis actividades de tiempo libre.', 'Puedo usar usually, often, sometimes y never.', 'Puedo preguntar How often…?', 'Puedo describir mis planes habituales de fin de semana.'] },
+  },
 ];
 
 export function getUnitWorkbook(level: LevelId, unitId?: string): UnitWorkbook | undefined {
