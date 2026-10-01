@@ -126,6 +126,26 @@ export const unitWorkbooks: UnitWorkbook[] = [
     reading: { title: 'Lee y comprende', text: 'Daniel gets up at six thirty every weekday. He has breakfast and walks to work. He starts work at eight. In the evening, he usually cooks dinner and reads a book.', question: 'How does Daniel go to work?', answer: 'He walks' },
     selfCheck: { items: ['Puedo hablar de mi rutina.', 'Puedo decir la hora de una actividad.', 'Puedo usar el presente simple.', 'Puedo usar usually, sometimes y never.'] },
   },
+  {
+    unitId: 'a1-unit-6',
+    level: 'a1',
+    title: 'Unidad 6 · Comida y compras',
+    instructions: 'Practica cómo pedir comida, expresar lo que quieres y preguntar precios y cantidades. Usa would like, some, any y how much.',
+    fill: [
+      { id: 'fill-1', prompt: 'I ____ like a sandwich, please.', answer: 'would' },
+      { id: 'fill-2', prompt: 'Can I have ____ water?', answer: 'some' },
+      { id: 'fill-3', prompt: 'How ____ is this coffee?', answer: 'much' },
+      { id: 'fill-4', prompt: 'Are there ____ apples?', answer: 'any' },
+      { id: 'fill-5', prompt: 'I would like ____ orange, please.', answer: 'an' },
+      { id: 'fill-6', prompt: 'How much ____ two sandwiches?', answer: 'are' },
+    ],
+    translation: { prompt: 'Quisiera una botella de agua y una manzana, por favor.', answer: 'I would like a bottle of water and an apple, please.', hint: 'Usa I would like para pedir con amabilidad. Apple empieza con sonido vocálico: an apple.' },
+    order: { words: ['like', 'I', 'a', 'would', 'coffee,', 'please.'], answer: 'I would like a coffee, please.', prompt: 'Pon las palabras en orden para hacer un pedido.' },
+    dictation: { answer: 'How much is the soup?', prompt: 'Escucha y escribe la pregunta.' },
+    writing: { prompt: 'Escribe un pedido breve de 4–5 frases. Saluda, pide dos productos, pregunta el precio y despídete.', sample: 'Hello. I would like a sandwich and a bottle of water, please. How much are they? Thank you. Goodbye.', lines: 5 },
+    reading: { title: 'Lee y comprende', text: 'At the market, Leo buys some bananas, two apples and a bottle of water. The bananas are two pounds. He asks, “How much are the apples?” The seller says, “They are one pound.”', question: 'How much are the apples?', answer: 'One pound' },
+    selfCheck: { items: ['Puedo pedir comida con amabilidad.', 'Puedo preguntar cuánto cuesta algo.', 'Puedo usar some y any.', 'Puedo decir cantidades y precios.'] },
+  },
 ];
 
 export function getUnitWorkbook(level: LevelId, unitId?: string): UnitWorkbook | undefined {
