@@ -346,6 +346,26 @@ export const unitWorkbooks: UnitWorkbook[] = [
     reading: { title: 'Lee y comprende', text: 'Last summer, Ana travelled to the coast. She was swimming when her friend called her. They are going to return next year because they loved the beach. Ana thinks the small town is relaxing and affordable.', question: 'Why are Ana and her friend going to return?', answer: 'Because they loved the beach' },
     selfCheck: { items: ['Puedo contar una experiencia pasada.', 'Puedo hablar de un plan futuro.', 'Puedo dar un consejo.', 'Puedo expresar una opinión con una razón.'] },
   },
+  {
+    unitId: 'b1-unit-1',
+    level: 'b1',
+    title: 'Unidad 1 · Experiencias personales',
+    instructions: 'Habla de experiencias de tu vida y conecta el pasado con el presente. Practica present perfect, past simple y since/for.',
+    fill: [
+      { id: 'fill-1', prompt: 'I have ____ to Italy twice.', answer: 'been' },
+      { id: 'fill-2', prompt: 'She has ____ her project already.', answer: 'finished' },
+      { id: 'fill-3', prompt: 'We ____ in this city since 2020.', answer: 'have lived' },
+      { id: 'fill-4', prompt: 'I visited London ____ year.', answer: 'last' },
+      { id: 'fill-5', prompt: 'Have you ____ tried sushi?', answer: 'ever' },
+      { id: 'fill-6', prompt: 'They have worked here ____ five years.', answer: 'for' },
+    ],
+    translation: { prompt: 'He vivido en esta ciudad durante cinco años, pero el año pasado viajé a otra región.', answer: 'I have lived in this city for five years, but last year I travelled to another region.', hint: 'Usa present perfect con for para una situación que continúa y past simple con last year.' },
+    order: { words: ['ever', 'Have', 'you', 'visited', 'another', 'country?'], answer: 'Have you ever visited another country?', prompt: 'Ordena la pregunta sobre una experiencia.' },
+    dictation: { answer: 'I have never tried skydiving.', prompt: 'Escucha y escribe la frase.' },
+    writing: { prompt: 'Escribe 6–7 frases sobre tres experiencias personales. Usa present perfect para experiencias y past simple para contar cuándo ocurrió una.', sample: 'I have visited three countries. I have never tried skiing. Last summer, I travelled to Portugal with my family. We stayed near the coast and visited several towns.', lines: 7 },
+    reading: { title: 'Lee y comprende', text: 'Carlos has worked as a photographer for six years. He has travelled to many cities for his job. Last month, he visited Lisbon and took pictures of the old town. He has never worked in Africa, but he would like to go there.', question: 'How long has Carlos worked as a photographer?', answer: 'For six years' },
+    selfCheck: { items: ['Puedo hablar de experiencias de mi vida.', 'Puedo usar have/has + participio.', 'Puedo usar since y for.', 'Puedo cambiar al pasado simple para contar cuándo ocurrió algo.'] },
+  },
 ];
 
 export function getUnitWorkbook(level: LevelId, unitId?: string): UnitWorkbook | undefined {
