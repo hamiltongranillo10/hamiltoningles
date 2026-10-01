@@ -146,6 +146,26 @@ export const unitWorkbooks: UnitWorkbook[] = [
     reading: { title: 'Lee y comprende', text: 'At the market, Leo buys some bananas, two apples and a bottle of water. The bananas are two pounds. He asks, “How much are the apples?” The seller says, “They are one pound.”', question: 'How much are the apples?', answer: 'One pound' },
     selfCheck: { items: ['Puedo pedir comida con amabilidad.', 'Puedo preguntar cuánto cuesta algo.', 'Puedo usar some y any.', 'Puedo decir cantidades y precios.'] },
   },
+  {
+    unitId: 'a1-unit-7',
+    level: 'a1',
+    title: 'Unidad 7 · Ciudad y direcciones',
+    instructions: 'Aprende a pedir y dar indicaciones sencillas. Practica los imperativos, can y el vocabulario de calles y lugares.',
+    fill: [
+      { id: 'fill-1', prompt: 'Go ____ ahead for two blocks.', answer: 'straight' },
+      { id: 'fill-2', prompt: 'Turn ____ at the bank.', answer: 'left' },
+      { id: 'fill-3', prompt: 'The library is ____ the station.', answer: 'near' },
+      { id: 'fill-4', prompt: '____ you tell me the way to the museum?', answer: 'Can' },
+      { id: 'fill-5', prompt: 'The café is ____ the supermarket and the bank.', answer: 'between' },
+      { id: 'fill-6', prompt: 'Cross the ____ at the traffic lights.', answer: 'street' },
+    ],
+    translation: { prompt: '¿Puedes decirme cómo llegar a la biblioteca? Sigue recto y gira a la derecha.', answer: 'Can you tell me how to get to the library? Go straight and turn right.', hint: 'Para pedir ayuda usa Can you tell me…? Los imperativos no necesitan sujeto: Go straight.' },
+    order: { words: ['right', 'Turn', 'at', 'the', 'corner.'], answer: 'Turn right at the corner.', prompt: 'Pon las palabras en orden para dar una indicación.' },
+    dictation: { answer: 'The museum is next to the park.', prompt: 'Escucha y escribe la frase.' },
+    writing: { prompt: 'Escribe 4–5 frases para explicar cómo llegar desde una estación hasta un lugar de tu ciudad.', sample: 'Go straight for one block. Turn left at the bank. The library is next to the park. You can see it on the right.', lines: 5 },
+    reading: { title: 'Lee y comprende', text: 'The hotel is near the train station. Go straight for one block and turn right at the bank. The hotel is next to a small café, opposite the park.', question: 'What is the hotel next to?', answer: 'A small café' },
+    selfCheck: { items: ['Puedo pedir indicaciones.', 'Puedo decir go straight y turn left/right.', 'Puedo usar can para pedir ayuda.', 'Puedo ubicar un lugar en la ciudad.'] },
+  },
 ];
 
 export function getUnitWorkbook(level: LevelId, unitId?: string): UnitWorkbook | undefined {
