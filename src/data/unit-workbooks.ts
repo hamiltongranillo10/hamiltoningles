@@ -492,6 +492,24 @@ export const unitWorkbooks: UnitWorkbook[] = [
     reading: { title: 'Lee y comprende', text: 'The community project has been running for two years. It was created by volunteers who wanted to help older residents. If the project receives more funding, it will offer more services. In the organizers’ opinion, it has already had a strong impact.', question: 'Who created the community project?', answer: 'Volunteers' },
     selfCheck: { items: ['Puedo contar una experiencia con claridad.', 'Puedo explicar una opinión y una razón.', 'Puedo analizar una condición y su resultado.', 'Puedo describir un proyecto con una relative clause.'] },
   },
+  {
+    unitId: 'b2-unit-1', level: 'b2', title: 'Unidad 1 · Ideas y argumentos',
+    instructions: 'Defiende una postura con razones, concesiones y consecuencias. Practica conectores avanzados y condicionales mixtos.',
+    fill: [
+      { id: 'fill-1', prompt: 'The proposal is useful; ____, it may be expensive.', answer: 'nevertheless' },
+      { id: 'fill-2', prompt: 'The plan would work ____ the budget were larger.', answer: 'if' },
+      { id: 'fill-3', prompt: 'The decision ____ significant consequences.', answer: 'may have' },
+      { id: 'fill-4', prompt: 'The project was delayed; ____, the final result was strong.', answer: 'however' },
+      { id: 'fill-5', prompt: 'The main ____ is that the system is not scalable.', answer: 'claim' },
+      { id: 'fill-6', prompt: 'We need to consider the possible ____-off.', answer: 'trade' },
+    ],
+    translation: { prompt: 'Aunque la propuesta es prometedora, debemos considerar sus posibles consecuencias.', answer: 'Although the proposal is promising, we must consider its possible consequences.', hint: 'Although introduce una concesión. Consequences es un sustantivo contable en plural.' },
+    order: { words: ['the', 'Nevertheless,', 'proposal', 'deserves', 'further', 'review.'], answer: 'Nevertheless, the proposal deserves further review.', prompt: 'Ordena el argumento con un conector.' },
+    dictation: { answer: 'If the budget were larger, the project would be more ambitious.', prompt: 'Escucha y escribe la frase.' },
+    writing: { prompt: 'Escribe 7–8 frases defendiendo una propuesta. Incluye dos razones, una concesión y una consecuencia hipotética.', sample: 'The proposal deserves further review because it could reduce costs. Nevertheless, implementation would be complex. If the budget were larger, the project would be more ambitious. On balance, the benefits may outweigh the risks.', lines: 8 },
+    reading: { title: 'Lee y comprende', text: 'The city is considering a new public transport plan. Supporters claim that it would reduce traffic, whereas critics are concerned about the cost. Nevertheless, if the plan were implemented carefully, it might improve access for many residents.', question: 'What might the plan improve?', answer: 'Access for many residents' },
+    selfCheck: { items: ['Puedo presentar una postura con claridad.', 'Puedo conectar razones y consecuencias.', 'Puedo reconocer una objeción.', 'Puedo usar concesiones y condicionales.'] },
+  },
 ];
 
 export function getUnitWorkbook(level: LevelId, unitId?: string): UnitWorkbook | undefined {
