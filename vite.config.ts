@@ -15,6 +15,7 @@ const driveAudioApi: Plugin = {
 
 export default defineConfig({
   plugins: [react(), driveAudioApi],
+  base: '/hamiltoningles/',
   server: {
     host: '0.0.0.0',
     port: 3000,
