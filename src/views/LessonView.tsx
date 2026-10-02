@@ -47,7 +47,7 @@ export function LessonView({ level, selectedLevel, selectedUnitId, onSelectLevel
             <div className="section-label"><span className="section-number">02</span><div><span className="eyebrow">FRASES DEL MÓDULO</span><h3>Escucha y entiende</h3></div></div>
             <p className="section-description">La guía de pronunciación es aproximada; escucha la voz del dispositivo si está disponible.</p>
             <div className="phrase-list">
-              {level.phrases.map((phrase, index) => (
+              {activeUnit.phrases.map((phrase, index) => (
                 <article key={phrase.english} className="phrase-row">
                   <span className="phrase-index">{String(index + 1).padStart(2, '0')}</span>
                   <div className="phrase-copy"><strong>{phrase.english}</strong><span>{phrase.spanish}</span><small>Pronunciación aproximada: {phrase.pronunciation}</small></div>
