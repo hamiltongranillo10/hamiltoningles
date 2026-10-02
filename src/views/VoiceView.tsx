@@ -58,6 +58,24 @@ function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'No se pudo traducir en este dispositivo.';
 }
 
+async function requestConversationReply(level: LevelId, topic: ConversationTopic, messages: ConversationMessage[]) {
+  const response = await fetch('/api/conversation', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      level,
+      topic: topic.title,
+      messages: messages.slice(-12).map((message) => ({
+        role: message.speaker === 'you' ? 'user' : 'assistant',
+        content: message.english,
+      })),
+    }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(typeof payload.error === 'string' ? payload.error : 'La IA conversacional no pudo responder.');
+  return payload as { reply: string; translation?: string; correction?: string; tip?: string };
+}
+
 export function VoiceView() {
   const initialPreferences = initialConversationPreferences();
   const clientRef = useRef<ReturnType<typeof createAudioModelClient> | null>(null);
@@ -237,14 +255,23 @@ export function VoiceView() {
     setConversationTurns((current) => current + 1);
     if (correction) setConversationCorrections((current) => current + 1);
     setConversationHistory((current) => [{ id, topicId: conversationTopic.id, level: conversationLevel, title: conversationTopic.title, turns: conversationTurns + 1, corrections: conversationCorrections + (correction ? 1 : 0), startedAt: conversationStartedAtRef.current, endedAt: new Date().toISOString() }, ...current].slice(0, 20));
-    setConversationStatus('Traduciendo tu respuesta en este dispositivo…');
+    setConversationStatus('Traduciendo y preparando la respuesta de la IA…');
     try {
       const result = await translateWithFallback(clean);
       setConversationMessages((current) => current.map((message) => message.id === id ? { ...message, translation: result.translation } : message));
+      const reply = await requestConversationReply(conversationLevel, conversationTopic, [...conversationMessages, { id, speaker: 'you', english: clean, translation: result.translation, correction }]);
+      setConversationMessages((current) => [...current, {
+        id: Date.now(),
+        speaker: 'companion',
+        english: reply.reply,
+        translation: reply.translation || 'Traducción no disponible.',
+        correction: reply.correction || undefined,
+        tip: reply.tip || undefined,
+      }]);
       setConversationStatus('');
     } catch {
       setConversationMessages((current) => current.map((message) => message.id === id ? { ...message, translation: 'Traducción no disponible; puedes continuar la conversación.' } : message));
-      setConversationStatus('Puedes continuar; la traducción local no respondió esta vez.');
+      setConversationStatus('No se pudo obtener una respuesta de la IA. Revisa la configuración del servidor e inténtalo de nuevo.');
     }
   }
 

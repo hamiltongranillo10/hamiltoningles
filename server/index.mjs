@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
 import { handleDriveAudioRequest } from './drive-audio.mjs';
+import { handleConversationRequest } from './conversation.mjs';
 
 const port = Number(process.env.PORT ?? 8080);
 if (!Number.isInteger(port) || port < 1024 || port > 65535) {
@@ -20,6 +21,10 @@ const server = createServer((req, res) => {
   }
   if (pathname === '/api/drive/audio') {
     void handleDriveAudioRequest(req, res);
+    return;
+  }
+  if (pathname === '/api/conversation') {
+    void handleConversationRequest(req, res);
     return;
   }
   if (pathname.startsWith('/api/')) {
