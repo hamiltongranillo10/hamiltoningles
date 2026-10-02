@@ -3,6 +3,7 @@ import { AudioButton } from '../components/AudioButton';
 import { Icon } from '../components/Icons';
 import type { AppView } from '../components/AppShell';
 import { levels, type LevelData, type LevelId } from '../data/course';
+import { getUnit } from '../data/curriculum';
 import { answerMatches } from '../utils';
 import { getUnitWorkbook } from '../data/unit-workbooks';
 
@@ -21,6 +22,7 @@ export function WorksheetView({ level, selectedUnitId, answers, reviewed, onAnsw
   const [showKey, setShowKey] = useState(false);
   const [includeKeyPrint, setIncludeKeyPrint] = useState(false);
   const [chosenWords, setChosenWords] = useState<number[]>([]);
+  const activeUnit = getUnit(level.id, selectedUnitId);
   const unitWorkbook = getUnitWorkbook(level.id, selectedUnitId);
   const workbook = unitWorkbook ?? level.workbook;
   const reading = unitWorkbook?.reading;
@@ -91,7 +93,7 @@ export function WorksheetView({ level, selectedUnitId, answers, reviewed, onAnsw
       <div className="level-ribbon no-print"><span className={`level-badge level-${level.id}`}>{level.cefr}</span><strong>{level.module}</strong><span>{level.lessonTitle}</span><span className="ribbon-spacer" /><label className="ribbon-level-label">Cambiar nivel<select value={level.id} onChange={(event) => onSelectLevel(event.target.value as LevelId)} aria-label="Cambiar nivel de la hoja">{levels.map((item) => <option key={item.id} value={item.id}>{item.cefr} · {item.name}</option>)}</select></label><button type="button" className="text-button" onClick={() => onNavigate('lesson')}><Icon name="back" size={15} /> Lección</button></div>
 
       <div className="workbook-steps no-print">
-        <div><span>01</span><strong>Aprende</strong><small>{level.phrases.length} frases y guía de pronunciación</small></div>
+        <div><span>01</span><strong>Aprende</strong><small>{activeUnit.phrases.length} frases y guía de pronunciación</small></div>
         <div><span>02</span><strong>Resuelve</strong><small>{workbook.fill.length + 3} ejercicios revisables</small></div>
         <div><span>03</span><strong>Produce</strong><small>Traducción y escritura para {level.cefr}</small></div>
       </div>
@@ -112,7 +114,7 @@ export function WorksheetView({ level, selectedUnitId, answers, reviewed, onAnsw
 
         <div className="exercise-section workbook-learn-section">
           <div className="exercise-section-title"><span className="section-number">01</span><div><span className="eyebrow">REPASA</span><h3>Frases de la lección</h3></div></div>
-          <div className="worksheet-phrase-grid">{level.phrases.map((phrase, index) => <div className="worksheet-phrase" key={phrase.english}><span>{String(index + 1).padStart(2, '0')}</span><strong>{phrase.english}</strong><small>{phrase.spanish}</small><em>Pronunciación aprox.: {phrase.pronunciation}</em></div>)}</div>
+          <div className="worksheet-phrase-grid">{activeUnit.phrases.map((phrase, index) => <div className="worksheet-phrase" key={phrase.english}><span>{String(index + 1).padStart(2, '0')}</span><strong>{phrase.english}</strong><small>{phrase.spanish}</small><em>Pronunciación aprox.: {phrase.pronunciation}</em></div>)}</div>
         </div>
 
         <div className="exercise-section">
